@@ -269,8 +269,8 @@
          */
         function updatePurchaseButtonState(robux) {
             const button = document.getElementById('purchase-button');
-            // Minimum purchase is 500 Robux
-            const minimumPurchase = 500; 
+            // Minimum purchase is 1000 Robux
+            const minimumPurchase = 1000; 
 
             if (robux < minimumPurchase) {
                 button.disabled = true;
@@ -408,4 +408,5 @@
     </script>
 </body>
 </html>
+
 
