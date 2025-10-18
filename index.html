@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BuxerShop | The Best Rates</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Loading font weights 400, 600, 700, and 800 -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #333; 
+            overflow-x: hidden; 
+            scroll-padding-top: 6rem; 
+        }
+
+        /* Custom panel styling: Blue Neon Glow */
+        .neon-glow-panel {
+            background-color: rgba(0, 0, 0, 0.6); 
+            border: 2px solid #3b82f6; 
+            box-shadow: 0 0 10px #3b82f6,
+                        0 0 20px #3b82f6,
+                        0 0 40px rgba(59, 130, 246, 0.4); 
+        }
+        
+        /* Animation for Pop and Bounce Effect */
+        .modal-bounce-content {
+            transition-property: transform;
+            transition-duration: 300ms;
+            transition-timing-function: cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        }
+
+        /* Snowflake animation */
+        .snowflake {
+            position: fixed;
+            top: -10px; 
+            color: #f3f4f6; 
+            z-index: 10;
+            user-select: none;
+            pointer-events: none;
+            opacity: 0.7;
+            animation-name: fall;
+            animation-iteration-count: infinite;
+            animation-timing-function: linear;
+        }
+
+        @keyframes fall {
+            0% { transform: translateY(0); opacity: 0.8; }
+            100% { transform: translateY(100vh); opacity: 0.1; }
+        }
+
+        /* Set specific durations and sizes for snowflakes */
+        .flake-sm { font-size: 10px; animation-duration: 15s; }
+        .flake-md { font-size: 14px; animation-duration: 20s; }
+        .flake-lg { font-size: 18px; animation-duration: 25s; }
+    </style>
+</head>
+
+<body class="min-h-screen flex flex-col items-center p-4"> 
+
+    <!-- SNOWFLAKE GENERATION (CSS Animation) -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const body = document.body;
+            const flakeCount = 50;
+            const types = [
+                { class: 'flake-sm', text: '*' },
+                { class: 'flake-md', text: '•' },
+                { class: 'flake-lg', text: '°' }
+            ];
+
+            for (let i = 0; i < flakeCount; i++) {
+                const flake = document.createElement('div');
+                flake.classList.add('snowflake', types[i % 3].class);
+                flake.textContent = types[i % 3].text;
+                flake.style.left = `${Math.random() * 100}vw`;
+                flake.style.animationDelay = `-${Math.random() * 25}s`; 
+                body.appendChild(flake);
+            }
+        });
+    </script>
+    <!-- END SNOWFLAKE GENERATION -->
+
+    <!-- NAVIGATION BAR -->
+    <nav class="fixed top-0 left-0 w-full z-40 bg-gray-900/90 backdrop-blur-sm shadow-xl p-4 border-b border-blue-700">
+        <div class="max-w-7xl mx-auto flex justify-between items-center px-4">
+            <!-- Logo/Shop Title -->
+            <a href="#shop-section" class="text-2xl font-extrabold text-blue-300 tracking-tighter hover:text-white transition duration-200" style="text-shadow: 0 0 5px #3b82f6;">
+                BuxerShop
+            </a>
+            
+            <!-- Navigation Links -->
+            <div class="flex space-x-6 md:space-x-8">
+                <a href="#shop-section" class="text-white hover:text-blue-400 font-semibold transition duration-200">Shop</a>
+                <a href="#why-us-section" class="text-white hover:text-blue-400 font-semibold transition duration-200">Why Us?</a>
+                <!-- Contact Us opens the modal -->
+                <button onclick="openModal()" class="text-blue-400 hover:text-blue-200 font-semibold transition duration-200 focus:outline-none">Contact Us</button>
+            </div>
+        </div>
+    </nav>
+    <!-- END NAVIGATION BAR -->
+
+
+    <main id="shop-section" class="w-full max-w-md md:max-w-xl lg:max-w-2xl mt-24 mb-16">
+        <!-- HEADER - Site Name (Glow) -->
+        <h1 class="text-6xl md:text-7xl font-extrabold text-center mb-8 tracking-tighter text-white" style="text-shadow: 0 0 10px #3b82f6, 0 0 20px #60a5fa; color: #dbeafe;">
+            BuxerShop
+        </h1>
+        <p class="text-center text-lg font-medium text-blue-300 mb-8">
+            The Best Robux Provider!
+        </p>
+
+
+        <!-- MAIN PANEL -->
+        <div class="neon-glow-panel p-6 sm:p-10 rounded-xl shadow-2xl transition-all duration-300">
+            <!-- Purchase Section -->
+            <h2 class="text-3xl font-bold text-white mb-6 border-b border-blue-700 pb-3">Get Your Robux Now!</h2>
+
+            <!-- Core Offer Display - Competitive 5.00 EUR price -->
+            <div class="bg-blue-900/50 p-4 rounded-lg mb-6 text-center">
+                <p class="text-xl text-blue-300 font-semibold">Incredible Value:</p>
+                <p class="text-4xl font-extrabold text-blue-200 mt-1">1000 Robux for only 5.00 EUR</p>
+            </div>
+
+            <!-- PURCHASE INTERFACE -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+                <!-- 1. Robux Amount Input -->
+                <div class="sm:col-span-1">
+                    <label for="robux" class="block text-sm font-medium text-blue-300 mb-1">Robux Amount</label>
+                    <input type="number" id="robux" value="500" min="1" step="10"
+                           oninput="calculateCost()"
+                           class="w-full p-3 bg-gray-700/80 text-white rounded-lg border border-blue-600 focus:ring-blue-500 focus:border-blue-500 transition duration-150">
+                </div>
+
+                <!-- 2. Currency Selector -->
+                <div class="sm:col-span-1">
+                    <label for="currency" class="block text-sm font-medium text-blue-300 mb-1">Pay In Currency</label>
+                    <select id="currency" onchange="calculateCost()"
+                            class="w-full p-3 bg-gray-700/80 text-white rounded-lg border border-blue-600 focus:ring-blue-500 focus:border-blue-500 transition duration-150 appearance-none">
+                        <option value="EUR">€ EUR - Euro</option>
+                        <option value="USD">$ USD - US Dollar</option>
+                        <option value="GBP">£ GBP - British Pound</option>
+                        <option value="CAD">$ CAD - Canadian Dollar</option>
+                        <option value="AUD">$ AUD - Australian Dollar</option>
+                        <option value="JPY">¥ JPY - Japanese Yen</option>
+                        <option value="CNY">¥ CNY - Chinese Yuan</option>
+                    </select>
+                </div>
+
+                <!-- 3. Total Cost Display -->
+                <div class="sm:col-span-1">
+                    <label for="total-cost" class="block text-sm font-medium text-blue-300 mb-1">Your Total Cost</label>
+                    <!-- Initial cost reflects 500 Robux @ 0.005 EUR/Robux = 2.50 EUR -->
+                    <div id="total-cost" class="w-full p-3 bg-blue-900/50 text-white text-lg font-bold rounded-lg h-[46px] flex items-center justify-center">
+                        € 2.50
+                    </div>
+                </div>
+            </div>
+
+            <!-- Call to Action -->
+            <button id="purchase-button"
+                    onclick="showMessage('Purchase initiated! (This is a concept site, no real transaction occurs.)')"
+                    class="w-full py-5 text-2xl font-bold rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/50 transition duration-300 ease-in-out transform hover:scale-[1.01] focus:outline-none focus:ring-4 focus:ring-blue-500/50">
+                Purchase Robux Now
+            </button>
+
+            <p class="text-center text-xs text-gray-400 mt-4">
+                Secure transaction using the official **Gamepass Method**.
+            </p>
+
+            <!-- WHY CHOOSE US? SECTION -->
+            <div id="why-us-section" class="mt-10 pt-6 border-t border-blue-700">
+                <h3 class="text-2xl font-bold text-white mb-4 text-center">Why Choose Us?</h3>
+                <div class="space-y-4">
+                    <div class="flex items-start p-4 bg-gray-800/80 rounded-lg">
+                        <svg class="w-6 h-6 text-blue-400 mr-3 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.275a1.125 1.125 0 011.238-1.238c.676-.135 1.372.193 1.834.656.462.463.79 1.159.655 1.834a1.125 1.125 0 01-1.238 1.238l-.656-.462c-.463-.462-.79-1.158-.655-1.834zM12 21.75c-5.523 0-10-4.477-10-10S6.477 1.75 12 1.75s10 4.477 10 10-4.477 10-10 10z"></path></svg>
+                        <div>
+                            <p class="text-lg font-semibold text-blue-200">The Cheapest</p>
+                            <p class="text-gray-300 text-sm">Our rate of 1000 Robux for 5.00 EUR is unbeatable. We guarantee the best value for your Buxland adventure.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start p-4 bg-gray-800/80 rounded-lg">
+                        <svg class="w-6 h-6 text-blue-400 mr-3 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                        <div>
+                            <p class="text-lg font-semibold text-blue-200">The Safest</p>
+                            <p class="text-gray-300 text-sm">We ensure maximum security by exclusively using the trusted and verified **Gamepass Method** for all transactions.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start p-4 bg-gray-800/80 rounded-lg">
+                        <svg class="w-6 h-6 text-blue-400 mr-3 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m5.356-2H9m1.528 10.165L12 21.75l2.472-5.585m-4.944 0h4.944M11 5.25v1.5"></path></svg>
+                        <div>
+                            <p class="text-lg font-semibold text-blue-200">The Most Reliable</p>
+                            <p class="text-gray-300 text-sm">Our automated system guarantees fast, reliable, and instant delivery of your purchased Robux 24/7.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Custom Alert Message Box -->
+            <div id="alert-box" class="fixed top-5 left-1/2 -translate-x-1/2 p-4 rounded-lg shadow-lg hidden text-center" role="alert">
+                <p id="alert-message" class="font-medium text-white"></p>
+            </div>
+            
+        </div>
+    </main>
+
+    <!-- Contact Modal Panel -->
+    <div id="contact-modal" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 transition-opacity duration-300 opacity-0 pointer-events-none">
+        <div id="contact-modal-content" class="neon-glow-panel p-8 rounded-xl max-w-sm w-11/12 mx-auto text-center relative transform scale-90 modal-bounce-content">
+            <button onclick="closeModal()" class="absolute top-3 right-3 text-gray-400 hover:text-white transition duration-200">
+                <!-- Close icon (X) -->
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <h3 class="text-2xl font-bold text-blue-300 mb-4">Having Trouble? Contact Us!</h3>
+            <p class="text-white text-lg font-mono tracking-wider break-words">
+                <a href="mailto:support@buxerstudio.com" class="text-blue-400 hover:text-blue-200 transition duration-200">
+                    support@buxerstudio.com
+                </a>
+            </p>
+            <p class="text-sm text-gray-400 mt-4">We usually respond within 24 hours.</p>
+        </div>
+    </div>
+    <!-- END Contact Modal -->
+
+    <footer class="text-center p-4 text-gray-500 text-sm w-full">
+        &copy; 2025 Robux Shop. Powering the Roblox Community.
+    </footer>
+
+    <script>
+        // Exchange rates set to the specific values requested by the user for maximum profit.
+        const RATES = {
+            'EUR': 1.00, 
+            'USD': 1.60, 
+            'GBP': 0.87, // GBP (British Pound) - 0.87 GBP per 1 EUR
+            'CAD': 1.63, // CAD (Canadian Dollar) - 1.63 CAD per 1 EUR
+            'AUD': 1.79, // AUD (Australian Dollar) - 1.79 AUD per 1 EUR
+            'JPY': 175.59, // JPY (Japanese Yen) - 175.59 JPY per 1 EUR
+            'CNY': 8.31, // CNY (Chinese Yuan) - 8.31 CNY per 1 EUR
+        };
+
+        // Price per Robux is set to maintain the competitive 5.00 EUR per 1000 Robux.
+        // 5.00 EUR / 1000 Robux = 0.005 EUR per Robux.
+        const ROBUX_PRICE_PER_EUR = 0.005; 
+
+        /**
+         * Converts a numerical value to a currency string.
+         * @param {number} amount
+         * @param {string} currencyCode
+         * @returns {string}
+         */
+        function formatCurrency(amount, currencyCode) {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: currencyCode,
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(amount);
+        }
+
+        /**
+         * Checks the Robux amount and enables/disables the purchase button, updating its appearance.
+         * @param {number} robux - The current amount of Robux entered.
+         */
+        function updatePurchaseButtonState(robux) {
+            const button = document.getElementById('purchase-button');
+            // Minimum purchase is 500 Robux
+            const minimumPurchase = 500; 
+
+            if (robux < minimumPurchase) {
+                button.disabled = true;
+                // Add grayed-out styles and remove hover/glow effects
+                button.classList.add('bg-gray-500', 'cursor-not-allowed', 'opacity-50', 'shadow-none');
+                button.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'shadow-lg', 'shadow-blue-500/50', 'hover:scale-[1.01]', 'focus:ring-blue-500/50');
+                // UPDATED: Button text
+                button.textContent = `Minimum ${minimumPurchase} Robux Required`; 
+            } else {
+                button.disabled = false;
+                // Remove grayed-out styles and add normal effects
+                button.classList.remove('bg-gray-500', 'cursor-not-allowed', 'opacity-50', 'shadow-none');
+                button.classList.add('bg-blue-600', 'hover:bg-blue-700', 'shadow-lg', 'shadow-blue-500/50', 'hover:scale-[1.01]', 'focus:ring-blue-500/50');
+                // UPDATED: Button text
+                button.textContent = 'Purchase Robux Now'; 
+            }
+        }
+
+
+        /**
+         * Calculates and updates the total cost based on the selected Robux amount and currency.
+         */
+        function calculateCost() {
+            const robuxInput = document.getElementById('robux'); 
+            const currencySelect = document.getElementById('currency');
+            const totalCostDisplay = document.getElementById('total-cost');
+
+            // --- Input Validation and Parsing ---
+            let robux = parseInt(robuxInput.value, 10);
+            const selectedCurrency = currencySelect.value;
+            const rate = RATES[selectedCurrency] || 1.00;
+
+            if (isNaN(robux) || robux < 1) {
+                robux = 1; // Visual minimum
+            }
+
+            // --- Calculation ---
+            // 1. Calculate the base cost in EUR (5 EUR / 1000 Robux)
+            const costInEUR = robux * ROBUX_PRICE_PER_EUR;
+
+            // 2. Convert the base cost to the selected currency
+            const finalCost = costInEUR * rate;
+
+            // --- Update Display ---
+            totalCostDisplay.textContent = formatCurrency(finalCost, selectedCurrency);
+
+            // Update button state after calculation
+            updatePurchaseButtonState(robux);
+        }
+
+        /**
+         * Shows a temporary, non-blocking message box.
+         * @param {string} message - The message to display.
+         * @param {string} type - 'success' or 'error'.
+         */
+        function showMessage(message, type = 'success') {
+            const alertBox = document.getElementById('alert-box');
+            const alertMessage = document.getElementById('alert-message');
+
+            alertMessage.textContent = message;
+            alertBox.className = 'fixed top-5 left-1/2 -translate-x-1/2 p-4 rounded-xl shadow-2xl transition duration-500 ease-in-out';
+            alertBox.style.zIndex = 1000;
+
+            // Apply styling based on type
+            if (type === 'success') {
+                alertBox.classList.add('bg-green-600', 'shadow-green-500/50');
+            } else {
+                alertBox.classList.add('bg-red-600', 'shadow-red-500/50');
+            }
+
+            alertBox.classList.remove('hidden');
+
+            // Hide after 4 seconds
+            setTimeout(() => {
+                alertBox.classList.add('hidden');
+                alertBox.classList.remove('bg-green-600', 'bg-red-600', 'shadow-green-500/50', 'shadow-red-500/50');
+            }, 4000);
+        }
+
+        /**
+         * Opens the contact modal with animation.
+         */
+        function openModal() {
+            const modal = document.getElementById('contact-modal');
+            const content = document.getElementById('contact-modal-content');
+
+            // 1. Show and enable interaction (fade in the overlay)
+            modal.classList.remove('pointer-events-none', 'opacity-0');
+            modal.classList.add('opacity-100');
+
+            // 2. Start pop and bounce animation
+            content.classList.remove('scale-90');
+            content.classList.add('scale-100');
+        }
+
+        /**
+         * Closes the contact modal with animation.
+         */
+        function closeModal() {
+            const modal = document.getElementById('contact-modal');
+            const content = document.getElementById('contact-modal-content');
+
+            // 1. Start fade-out and scale-down transition
+            modal.classList.remove('opacity-100');
+            modal.classList.add('opacity-0');
+            content.classList.remove('scale-100');
+            content.classList.add('scale-90');
+
+            // 2. Disable interaction after transition finishes (300ms)
+            setTimeout(() => {
+                modal.classList.add('pointer-events-none');
+            }, 300); // Must match CSS transition duration
+        }
+
+
+        // Initial calculation and button state update when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            calculateCost();
+            // Call explicitly to handle the initial state even if input value is 0 or less
+            updatePurchaseButtonState(parseInt(document.getElementById('robux').value, 10));
+
+            // Set up the click handler for the modal background
+            const modal = document.getElementById('contact-modal');
+            if (modal) {
+                modal.addEventListener('click', (e) => {
+                    // If the click target is the modal itself (the background overlay), close it
+                    // Also check if the modal is currently open to prevent closing during its own closing transition
+                    if (e.target === modal) {
+                        closeModal();
+                    }
+                });
+            }
+        });
+
+    </script>
+</body>
+</html>
