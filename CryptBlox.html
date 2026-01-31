@@ -1,0 +1,2952 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRYPTBLOX | The Digital Vault</title>
+    
+    <!-- Import external libraries -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
+    
+    <!-- Stripe -->
+    <script async src="https://js.stripe.com/v3/buy-button.js"></script>
+    <script src="https://js.stripe.com/v3/"></script>
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+        
+        :root {
+            --theme-color: #fbbf24;
+            --theme-glow: rgba(251, 191, 36, 0.4);
+            --theme-border: rgba(251, 191, 36, 0.2);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: #050505; 
+            color: white; 
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        ::-webkit-scrollbar { 
+            width: 8px; 
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track { 
+            background: #0a0a0a; 
+        }
+        
+        ::-webkit-scrollbar-thumb { 
+            background: var(--theme-color); 
+            border-radius: 10px; 
+        }
+
+        ::-webkit-scrollbar-thumb:hover { 
+            background: #f59e0b; 
+        }
+
+        .glass-nav { 
+            background: rgba(5, 5, 5, 0.95); 
+            backdrop-filter: blur(15px); 
+            border-bottom: 1px solid var(--theme-border); 
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .vault-card {
+            background: linear-gradient(145deg, #0f0f0f, #050505);
+            border: 1px solid var(--theme-border);
+            transition: all 0.3s ease;
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .theme-card {
+            background: #0a0a0a;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .theme-card:hover { 
+            border-color: rgba(255, 255, 255, 0.2); 
+            transform: translateY(-2px);
+        }
+        
+        .theme-card.active { 
+            border-color: var(--theme-color); 
+            box-shadow: 0 0 15px var(--theme-glow); 
+        }
+
+        .particle {
+            position: fixed;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .breathing-line {
+            height: 2px;
+            background: var(--theme-color);
+            box-shadow: 0 0 15px var(--theme-color);
+            margin: 20px auto;
+            border-radius: 2px;
+        }
+
+        .panel-glow:hover {
+            box-shadow: 0 0 30px var(--theme-glow), inset 0 0 15px rgba(255, 255, 255, 0.02);
+            border-color: var(--theme-color);
+        }
+
+        .discord-button {
+            background: #5865F2;
+            box-shadow: 0 0 15px rgba(88, 101, 242, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .discord-button:hover {
+            background: #4752C4;
+            transform: scale(1.05);
+        }
+
+        .text-theme { 
+            color: var(--theme-color) !important; 
+        }
+        
+        .bg-theme { 
+            background-color: var(--theme-color) !important; 
+        }
+        
+        /* Stock badge styles */
+        .stock-badge {
+            font-size: 10px;
+            padding: 4px 8px;
+            border-radius: 10px;
+            font-weight: 900;
+            letter-spacing: 0.5px;
+            display: inline-block;
+        }
+        
+        .stock-in { 
+            background: #22c55e; 
+            color: white; 
+        }
+        
+        .stock-out { 
+            background: #ef4444; 
+            color: white; 
+        }
+        
+        .stock-low { 
+            background: #f59e0b; 
+            color: white; 
+        }
+        
+        /* Admin panel styles */
+        .admin-panel {
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--theme-border);
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.8);
+        }
+        
+        /* Login modal styles */
+        .login-modal {
+            background: linear-gradient(135deg, #0a0a0a 0%, #050505 100%);
+            border: 1px solid var(--theme-border);
+            box-shadow: 0 0 50px var(--theme-glow);
+            position: relative;
+            z-index: 2000;
+        }
+        
+        .password-input {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .password-input:focus {
+            border-color: var(--theme-color);
+            box-shadow: 0 0 15px var(--theme-glow);
+            outline: none;
+        }
+        
+        /* Supplier become button */
+        .become-supplier-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .become-supplier-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.6);
+        }
+        
+        /* Feature card */
+        .feature-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: all 0.3s ease;
+            border-radius: 16px;
+        }
+        
+        .feature-card:hover {
+            border-color: var(--theme-border);
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* Search bar styles */
+        .search-bar {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            color: white;
+            font-size: 14px;
+        }
+        
+        .search-bar:focus {
+            border-color: var(--theme-color);
+            box-shadow: 0 0 15px var(--theme-glow);
+            background: rgba(255, 255, 255, 0.08);
+        }
+        
+        .search-results-dropdown {
+            background: rgba(15, 15, 15, 0.98);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--theme-border);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            position: absolute;
+            width: 100%;
+            z-index: 1000;
+        }
+        
+        .search-highlight {
+            background: rgba(251, 191, 36, 0.2);
+            color: var(--theme-color);
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+        
+        /* Team member card */
+        .team-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: all 0.3s ease;
+            overflow: hidden;
+            border-radius: 20px;
+        }
+        
+        .team-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--theme-border);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+        
+        .team-card:hover .team-image {
+            transform: scale(1.05);
+        }
+        
+        .team-image {
+            transition: transform 0.5s ease;
+            object-fit: cover;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .team-role-badge {
+            background: linear-gradient(135deg, var(--theme-color) 0%, #f59e0b 100%);
+            color: black;
+            font-weight: 900;
+            letter-spacing: 1px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+        
+        /* About us section */
+        .mission-section {
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.05) 0%, rgba(5, 5, 5, 1) 100%);
+            border: 1px solid rgba(251, 191, 36, 0.1);
+            border-radius: 24px;
+        }
+        
+        /* Logo triangle */
+        .logo-triangle {
+            display: inline-block;
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 8px solid var(--theme-color);
+            margin-left: 8px;
+            vertical-align: middle;
+            transition: transform 0.3s ease;
+        }
+        
+        .logo-container:hover .logo-triangle {
+            transform: rotate(180deg);
+        }
+        
+        /* Centered panels */
+        .centered-panels {
+            display: flex;
+            justify-content: center;
+            align-items: stretch;
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+        
+        /* Cart badge */
+        .cart-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #ef4444;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 900;
+        }
+        
+        /* Stripe button styles */
+        .stripe-button-container {
+            margin-top: 20px;
+        }
+        
+        stripe-buy-button {
+            width: 100% !important;
+            max-width: 400px !important;
+            margin: 0 auto !important;
+        }
+        
+        /* Cart item styles */
+        .cart-item {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 20px 0;
+        }
+        
+        .cart-item:last-child {
+            border-bottom: none;
+        }
+        
+        /* Quantity controls */
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .quantity-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--theme-color);
+            color: black;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        
+        .quantity-btn:hover {
+            opacity: 0.9;
+            transform: scale(1.1);
+        }
+        
+        .quantity-input {
+            width: 60px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 8px;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .centered-panels {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .glass-nav .flex {
+                flex-wrap: wrap;
+            }
+            
+            .glass-nav > div {
+                padding: 10px;
+            }
+            
+            .search-bar-container {
+                order: 3;
+                width: 100%;
+                margin-top: 10px;
+            }
+            
+            .nav-buttons {
+                order: 2;
+                overflow-x: auto;
+                white-space: nowrap;
+                padding-bottom: 5px;
+            }
+            
+            main {
+                padding-top: 100px !important;
+            }
+            
+            stripe-buy-button {
+                width: 100% !important;
+            }
+        }
+        
+        /* Button styles */
+        button {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* Loading animation */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading-spinner {
+            animation: spin 1s linear infinite;
+        }
+        
+        /* Custom animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .float-animation {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        /* Fix for mobile viewport */
+        @media (max-width: 480px) {
+            body {
+                font-size: 14px;
+            }
+            
+            h1 {
+                font-size: 2.5rem !important;
+            }
+            
+            h2 {
+                font-size: 2rem !important;
+            }
+            
+            .vault-card {
+                padding: 20px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+        const { motion, AnimatePresence } = window.Motion;
+
+        // Configuration Constants
+        const CONFIG = {
+            APP_NAME: 'CRYPTBLOX',
+            APP_VERSION: '2.0.0',
+            DISCORD_LINK: "https://discord.gg/zPefQsB4nu",
+            LOCAL_STORAGE_KEYS: {
+                ITEMS: 'cryptblox-items-v3',
+                THEME: 'cryptblox-theme-v3',
+                ADMIN: 'cryptblox-admin-v3',
+                CART: 'cryptblox-cart-v3'
+            },
+            ADMIN_CREDENTIALS: {
+                username: 'Cryptic',
+                password: '635kisepic'
+            },
+            DEFAULT_THEME: 'classic',
+            STRIPE_CONFIG: {
+                PUBLISHABLE_KEY: 'pk_live_51StBA369jQzUjcY7mN7pCTEqtq1obV6HPpStzdZtZKiIKTWhFRxK5S7Rm5oGFL77z9V3qTyyKhmqMnHv40cJQ9O8006Sv2NNzv',
+                BUY_BUTTON_ID: 'buy_btn_1Svh2669jQzUjcY7u1C33I0b',
+                CHECKOUT_URL: 'https://buy.stripe.com/dRm00c2Zbd5B87Z0wGdfG00'
+            }
+        };
+
+        const THEME_OPTIONS = [
+            { id: 'classic', name: 'Classic', label: 'Classic', color: '#fbbf24', glow: 'rgba(251, 191, 36, 0.4)' },
+            { id: 'blue', name: 'Blue', label: 'Ocean', color: '#3b82f6', glow: 'rgba(59, 130, 246, 0.4)' },
+            { id: 'green', name: 'Green', label: 'Nature', color: '#22c55e', glow: 'rgba(34, 197, 94, 0.4)' },
+            { id: 'orange', name: 'Orange', label: 'Honey', color: '#f97316', glow: 'rgba(249, 115, 22, 0.4)' },
+            { id: 'purple', name: 'Purple', label: 'Lollipop', color: '#a855f7', glow: 'rgba(168, 85, 247, 0.4)' },
+            { id: 'red', name: 'Red', label: 'Crimson Vault', color: '#ef4444', glow: 'rgba(239, 68, 68, 0.4)' }
+        ];
+
+        const CATEGORIES = {
+            limiteds: [
+                { name: 'Low Value', icon: '👑' },
+                { name: 'High Value', icon: '🎭' },
+                { name: 'Bundles', icon: '📦' },
+                { name: 'Coming Soon...', icon: '⌛' },
+            ],
+            accounts: [
+                { name: '18+ Accounts', icon: '📅' },
+                { name: 'VC Activated', icon: '🎙️' },
+                { name: 'Preloaded Robux Accounts', icon: '💎' },
+                { name: 'Preloaded Limited Accounts', icon: '💎' },
+                { name: 'Coming Soon...', icon: '⌛' },
+            ],
+            items: [
+                { name: 'Fisch', icon: '🐟' },
+                { name: 'Fish It!', icon: '🎣' },
+                { name: 'Death Ball', icon: '⚽' },
+                { name: 'Blade Ball', icon: '⚔️' },
+                { name: 'Escape Tsunami For Brainrots', icon: '🌊' },
+                { name: 'Steal A Brainrot', icon: '🧠' },
+                { name: 'Blox Fruits', icon: '🌊' },
+                { name: 'Adopt Me!', icon: '🏠' },
+                { name: 'Grow A Garden', icon: '🌱' },
+                { name: 'MM2', icon: '🔪' },
+                { name: 'Coming Soon...', icon: '⌛' },
+            ]
+        };
+
+        // Enhanced initial data structure
+        const INITIAL_ITEMS_DATA = {
+            limiteds: {
+                'Low Value': [
+                    { 
+                        id: 'lv-1', 
+                        name: 'Classic Halo', 
+                        price: 450, 
+                        stock: 5, 
+                        enabled: true, 
+                        description: 'Rare classic halo item with special effects',
+                        category: 'limiteds', 
+                        subCategory: 'Low Value',
+                        image: '',
+                        tags: ['rare', 'halo', 'classic'],
+                        createdAt: new Date().toISOString()
+                    },
+                    { 
+                        id: 'lv-2', 
+                        name: 'Pixel Shades', 
+                        price: 120, 
+                        stock: 3, 
+                        enabled: true, 
+                        description: 'Limited edition pixel art sunglasses',
+                        category: 'limiteds', 
+                        subCategory: 'Low Value',
+                        image: '',
+                        tags: ['accessory', 'pixel'],
+                        createdAt: new Date().toISOString()
+                    }
+                ],
+                'High Value': [
+                    { 
+                        id: 'hv-1', 
+                        name: 'Dominus Empyreus', 
+                        price: 1500, 
+                        stock: 1, 
+                        enabled: true, 
+                        description: 'Ultra rare dominus package',
+                        category: 'limiteds', 
+                        subCategory: 'High Value',
+                        image: '',
+                        tags: ['ultra-rare', 'dominus'],
+                        createdAt: new Date().toISOString()
+                    }
+                ],
+                'Bundles': [],
+                'Coming Soon...': []
+            },
+            accounts: {
+                '18+ Accounts': [
+                    { 
+                        id: 'aa-1', 
+                        name: 'Premium Age Verified', 
+                        price: 80, 
+                        stock: 10, 
+                        enabled: true, 
+                        description: 'Full access account with verified age',
+                        category: 'accounts', 
+                        subCategory: '18+ Accounts',
+                        image: '',
+                        tags: ['verified', 'full-access'],
+                        createdAt: new Date().toISOString()
+                    }
+                ],
+                'VC Activated': [],
+                'Preloaded Robux Accounts': [],
+                'Preloaded Limited Accounts': []
+            },
+            items: {
+                'Fisch': [
+                    { 
+                        id: 'fi-1', 
+                        name: 'Golden Fish', 
+                        price: 25, 
+                        stock: 20, 
+                        enabled: true, 
+                        description: 'Special golden fish item with unique abilities',
+                        category: 'items', 
+                        subCategory: 'Fisch',
+                        image: '',
+                        tags: ['collectible', 'gold'],
+                        createdAt: new Date().toISOString()
+                    }
+                ],
+                'Fish It!': [],
+                'Blox Fruits': [],
+                'MM2': []
+            }
+        };
+
+        const SUPPLIERS_DATA = [
+            { 
+                id: 'supp-1', 
+                name: 'None! Become one!', 
+                rating: 'N/A', 
+                items: 0, 
+                status: 'Pending', 
+                icon: '👑',
+                description: 'Join our supplier network',
+                joinDate: '2024',
+                totalSales: 0
+            },
+        ];
+
+        const TEAM_MEMBERS = [
+            {
+                id: 1,
+                name: '635k',
+                role: 'Founder & Lead Developer',
+                description: 'Head website developer and technical lead',
+                image: 'AboutIcons/icon1.png',
+                discord: 'poopdog10',
+                joined: '2024',
+                expertise: ['Web Development', 'Security', 'System Architecture']
+            },
+            {
+                id: 2,
+                name: 'Cyptic',
+                role: 'Owner & Creative Director',
+                description: 'Head of management and creative direction',
+                image: 'AboutIcons/icon2.png',
+                discord: 'currentlycryptic',
+                joined: '2024',
+                expertise: ['Management', 'Creative Direction', 'Business Strategy']
+            }
+        ];
+
+        const MILESTONES = [
+            { year: 'Early 2026', event: 'Active Development', description: 'Continuous improvements and new features' }
+        ];
+
+        // ============================================
+        // DISCORD NOTIFICATION SERVICE
+        // ============================================
+        const DiscordService = {
+            // Base64 encoded webhook URL for basic obfuscation
+            getWebhookUrl: () => {
+                const parts = [
+                    "aHR0cHM6Ly9kaXNjb3JkLmNvbS9hcGkvd2ViaG9va3MvMTQ2NzE5OTU3NjQwNTQ0MjgxNC8=",
+                    "eFVpdkVmd21oZUp0OXpJY3lSMldkUkZzOXZN",
+                    "UExMX0c0LTVtRDVvUHgwd1ZuZEpDWDBUOHRIeWh2",
+                    "cm9XVjROaUpoZVU="
+                ];
+                return atob(parts.join(''));
+            },
+
+            // Send purchase notification to Discord
+            sendPurchaseNotification: async (cartItems, totalAmount) => {
+                try {
+                    console.log('📤 Sending Discord notification...');
+                    
+                    // Format items list for Discord
+                    const itemsList = cartItems.map(item => 
+                        `• ${item.quantity}x **${item.name}** - $${item.price}`
+                    ).join('\n');
+                    
+                    // Create Discord embed
+                    const embed = {
+                        title: "💰 New Purchase - CRYPTBLOX",
+                        description: `**Purchase Successful!**\n\n**Items Purchased:**\n${itemsList}\n\n**Total:** $${totalAmount.toFixed(2)}`,
+                        color: 0xFBBF24, // Yellow theme color
+                        timestamp: new Date().toISOString(),
+                        fields: [
+                            {
+                                name: "Order ID",
+                                value: `CRYPT-${Date.now().toString().slice(-8)}`,
+                                inline: true
+                            },
+                            {
+                                name: "Items Count",
+                                value: cartItems.reduce((sum, item) => sum + item.quantity, 0).toString(),
+                                inline: true
+                            },
+                            {
+                                name: "Store",
+                                value: "CryptBlox Digital Vault",
+                                inline: true
+                            }
+                        ],
+                        footer: {
+                            text: "CryptBlox v2.0 • Automated Notification"
+                        },
+                        thumbnail: {
+                            url: "https://cdn-icons-png.flaticon.com/512/4712/4712035.png"
+                        }
+                    };
+
+                    // Create payload
+                    const payload = {
+                        embeds: [embed],
+                        username: "CryptBlox Store Bot",
+                        avatar_url: "https://cdn-icons-png.flaticon.com/512/4712/4712035.png",
+                        content: cartItems.length > 2 ? "@here Large purchase completed! 🎉" : ""
+                    };
+
+                    // Send to Discord webhook
+                    const response = await fetch(this.getWebhookUrl(), {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (response.ok) {
+                        console.log('✅ Discord notification sent successfully');
+                        return { success: true };
+                    } else {
+                        console.warn('⚠️ Discord notification failed');
+                        return { success: false };
+                    }
+                } catch (error) {
+                    console.error('❌ Discord notification error:', error);
+                    return { success: false, error: error.message };
+                }
+            },
+
+            // Test function (can be called from browser console)
+            testNotification: () => {
+                const testItems = [
+                    { name: 'Test Item 1', price: 99.99, quantity: 2 },
+                    { name: 'Test Item 2', price: 49.99, quantity: 1 }
+                ];
+                const total = testItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                this.sendPurchaseNotification(testItems, total);
+                alert('Test notification sent to Discord! Check your Discord channel.');
+            }
+        };
+
+        // ============================================
+        // UTILITY FUNCTIONS
+        // ============================================
+        const Storage = {
+            get: (key) => {
+                try {
+                    const item = localStorage.getItem(key);
+                    return item ? JSON.parse(item) : null;
+                } catch (error) {
+                    console.error('Storage get error:', error);
+                    return null;
+                }
+            },
+            
+            set: (key, value) => {
+                try {
+                    localStorage.setItem(key, JSON.stringify(value));
+                    return true;
+                } catch (error) {
+                    console.error('Storage set error:', error);
+                    return false;
+                }
+            },
+            
+            remove: (key) => {
+                try {
+                    localStorage.removeItem(key);
+                    return true;
+                } catch (error) {
+                    console.error('Storage remove error:', error);
+                    return false;
+                }
+            }
+        };
+
+        // ============================================
+        // STRIPE INTEGRATION
+        // ============================================
+        const StripeService = {
+            initStripe: () => {
+                if (!window.Stripe) {
+                    console.error('Stripe.js not loaded');
+                    return null;
+                }
+                return window.Stripe(CONFIG.STRIPE_CONFIG.PUBLISHABLE_KEY);
+            },
+
+            generateStripeButton: (cartItems) => {
+                if (!cartItems || cartItems.length === 0) return null;
+                
+                // Calculate total
+                const total = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                
+                return (
+                    <div className="stripe-button-container">
+                        <a 
+                            href={CONFIG.STRIPE_CONFIG.CHECKOUT_URL} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-black uppercase py-4 px-8 rounded-xl flex items-center justify-center gap-3 transition-all transform hover:scale-[1.02]"
+                            onClick={async (e) => {
+                                // Send Discord notification when user clicks checkout
+                                try {
+                                    await DiscordService.sendPurchaseNotification(cartItems, total);
+                                    console.log('✅ Purchase notification sent to Discord');
+                                } catch (error) {
+                                    console.log('⚠️ Discord notification failed (non-critical)');
+                                }
+                            }}
+                        >
+                            <i className="fas fa-credit-card"></i>
+                            Pay with Stripe - ${total.toFixed(2)}
+                        </a>
+                        
+                        <div className="mt-4 text-xs text-gray-400 text-center">
+                            Secure payment powered by Stripe
+                        </div>
+                    </div>
+                );
+            }
+        };
+
+        // ============================================
+        // COMPONENTS
+        // ============================================
+        const ParticleFall = ({ themeColor }) => {
+            const [flakes, setFlakes] = useState([]);
+            
+            useEffect(() => {
+                const createFlake = () => ({
+                    id: Math.random().toString(36).substr(2, 9),
+                    x: Math.random() * 100,
+                    size: Math.random() * 1 + 0.5,
+                    duration: Math.random() * 5 + 5,
+                    delay: Math.random() * 5,
+                    char: ['✦', '★', '✧', '❖'][Math.floor(Math.random() * 4)]
+                });
+                
+                setFlakes(Array.from({ length: 15 }, createFlake));
+                
+                const handleResize = () => {
+                    setFlakes(Array.from({ length: Math.min(20, Math.floor(window.innerWidth / 50)) }, createFlake));
+                };
+                
+                window.addEventListener('resize', handleResize);
+                return () => window.removeEventListener('resize', handleResize);
+            }, []);
+
+            return (
+                <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+                    {flakes.map(flake => (
+                        <motion.div
+                            key={flake.id}
+                            className="particle"
+                            initial={{ 
+                                y: "-10%", 
+                                x: `${flake.x}%`,
+                                opacity: 0
+                            }}
+                            animate={{ 
+                                y: "110vh",
+                                opacity: [0, 1, 0],
+                                rotate: 360
+                            }}
+                            transition={{ 
+                                duration: flake.duration, 
+                                delay: flake.delay,
+                                repeat: Infinity, 
+                                ease: "linear" 
+                            }}
+                            style={{ 
+                                fontSize: `${flake.size}rem`, 
+                                color: themeColor + '33',
+                                left: `${flake.x}%`
+                            }}
+                        >
+                            {flake.char}
+                        </motion.div>
+                    ))}
+                </div>
+            );
+        };
+
+        const StockBadge = ({ stock }) => {
+            if (stock === 0) return <span className="stock-badge stock-out">OUT OF STOCK</span>;
+            if (stock <= 5) return <span className="stock-badge stock-low">LOW STOCK: {stock}</span>;
+            return <span className="stock-badge stock-in">IN STOCK: {stock}</span>;
+        };
+
+        const TeamMemberCard = ({ member }) => {
+            const [imageError, setImageError] = useState(false);
+            
+            return (
+                <motion.div 
+                    whileHover={{ y: -10 }}
+                    className="team-card p-6"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                >
+                    <div className="relative h-64 rounded-xl overflow-hidden mb-6">
+                        {!imageError ? (
+                            <img 
+                                src={member.image} 
+                                alt={member.name}
+                                className="team-image w-full h-full object-cover"
+                                onError={() => setImageError(true)}
+                                loading="lazy"
+                            />
+                        ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-theme/20 to-black/50">
+                                <div className="text-6xl">
+                                    {member.name === '635k' ? '👨‍💻' : '🎨'}
+                                </div>
+                            </div>
+                        )}
+                        <div className="absolute bottom-4 right-4">
+                            <span className="team-role-badge">
+                                {member.role}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div className="space-y-4">
+                        <div>
+                            <h3 className="text-2xl font-black uppercase italic tracking-tight mb-2">
+                                {member.name}
+                            </h3>
+                            <p className="text-gray-400 text-sm">{member.description}</p>
+                        </div>
+                        
+                        <div className="space-y-2">
+                            <div className="flex items-center gap-2 text-sm">
+                                <i className="fab fa-discord text-theme"></i>
+                                <span className="text-gray-400">Discord:</span>
+                                <span className="text-theme font-black">{member.discord}</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-sm">
+                                <i className="far fa-calendar text-theme"></i>
+                                <span className="text-gray-400">Joined:</span>
+                                <span>{member.joined}</span>
+                            </div>
+                        </div>
+                        
+                        <div className="flex flex-wrap gap-2 pt-4">
+                            {member.expertise.map((skill, index) => (
+                                <span 
+                                    key={index} 
+                                    className="px-3 py-1 bg-white/5 rounded-lg text-xs font-bold"
+                                >
+                                    {skill}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                </motion.div>
+            );
+        };
+
+        const SearchBar = ({ onSearch, searchQuery, onClear, onItemSelect }) => {
+            const [isFocused, setIsFocused] = useState(false);
+            const inputRef = useRef(null);
+
+            const handleClear = (e) => {
+                e.stopPropagation();
+                onClear();
+                if (inputRef.current) {
+                    inputRef.current.focus();
+                }
+            };
+
+            return (
+                <div className="relative w-full max-w-md">
+                    <div className="relative">
+                        <input
+                            ref={inputRef}
+                            type="text"
+                            value={searchQuery}
+                            onChange={(e) => onSearch(e.target.value)}
+                            onFocus={() => setIsFocused(true)}
+                            onBlur={() => setTimeout(() => setIsFocused(false), 200)}
+                            placeholder="Search items, suppliers, categories..."
+                            className="search-bar w-full px-4 py-3 pl-12 rounded-2xl outline-none text-white placeholder-gray-400 text-sm"
+                            aria-label="Search items"
+                        />
+                        <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400">
+                            <i className="fas fa-search"></i>
+                        </div>
+                        {searchQuery && (
+                            <button
+                                onClick={handleClear}
+                                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                                aria-label="Clear search"
+                            >
+                                <i className="fas fa-times"></i>
+                            </button>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        const SearchResults = ({ results, query, onItemSelect, onClose }) => {
+            if (!query || results.length === 0) return null;
+
+            const highlightText = (text) => {
+                if (!query || !text) return text;
+                const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+                const parts = text.split(regex);
+                return parts.map((part, i) =>
+                    regex.test(part) ? <span key={i} className="search-highlight">{part}</span> : part
+                );
+            };
+
+            return (
+                <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    className="search-results-dropdown rounded-2xl overflow-hidden"
+                >
+                    <div className="p-4">
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-sm font-black uppercase text-theme">
+                                <i className="fas fa-search mr-2"></i>
+                                Results ({results.length})
+                            </h3>
+                            <button 
+                                onClick={onClose} 
+                                className="text-xs text-gray-400 hover:text-white transition-colors"
+                            >
+                                <i className="fas fa-times"></i>
+                            </button>
+                        </div>
+                        
+                        <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2">
+                            {results.map((result, index) => (
+                                <motion.div
+                                    key={`${result.type}-${result.id || result.name}`}
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: index * 0.05 }}
+                                    onClick={() => onItemSelect(result)}
+                                    className="p-3 hover:bg-white/5 rounded-xl cursor-pointer transition-all border border-white/5 hover:border-white/10"
+                                    role="button"
+                                    tabIndex={0}
+                                    onKeyPress={(e) => e.key === 'Enter' && onItemSelect(result)}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className="text-xl">
+                                            {result.type === 'item' ? '📦' : 
+                                             result.type === 'supplier' ? '🤝' : 
+                                             result.type === 'category' ? '📁' : '🔍'}
+                                        </div>
+                                        <div className="flex-1">
+                                            <div className="font-black text-sm uppercase tracking-tight">
+                                                {highlightText(result.name)}
+                                            </div>
+                                            <div className="flex items-center gap-2 mt-1">
+                                                <span className="text-xs text-gray-400">
+                                                    {result.type === 'item' ? `$${result.price}` : 
+                                                     result.type === 'supplier' ? `${result.items} items` :
+                                                     result.type === 'category' ? `${result.count} items` : ''}
+                                                </span>
+                                                {result.type === 'item' && (
+                                                    <StockBadge stock={result.stock} />
+                                                )}
+                                                <span className="text-[10px] px-2 py-1 bg-white/5 rounded-lg uppercase font-black">
+                                                    {result.type}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            ))}
+                        </div>
+                        
+                        {results.length === 0 && (
+                            <div className="text-center py-8">
+                                <div className="text-4xl mb-4 opacity-30">
+                                    <i className="fas fa-search"></i>
+                                </div>
+                                <p className="text-gray-400 font-bold">No results found for "{query}"</p>
+                                <p className="text-sm text-gray-500 mt-2">Try different keywords or browse categories</p>
+                            </div>
+                        )}
+                    </div>
+                </motion.div>
+            );
+        };
+
+        const SupplierCard = ({ supplier }) => (
+            <motion.div 
+                whileHover={{ y: -5 }} 
+                className="vault-card p-6"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3 }}
+            >
+                <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center gap-4">
+                        <div className="text-3xl">{supplier.icon}</div>
+                        <div>
+                            <h3 className="text-xl font-black uppercase italic tracking-tight mb-1">
+                                {supplier.name}
+                            </h3>
+                            <div className="flex items-center gap-3">
+                                <span className="text-theme font-bold">{supplier.rating}</span>
+                                <span className="text-gray-400 text-sm">• {supplier.items} items</span>
+                            </div>
+                        </div>
+                    </div>
+                    <span className={`px-3 py-1 rounded-lg text-xs font-black uppercase ${
+                        supplier.status === 'Active' ? 'bg-green-500' :
+                        supplier.status === 'Pending' ? 'bg-yellow-500' :
+                        'bg-blue-500'
+                    }`}>
+                        {supplier.status}
+                    </span>
+                </div>
+                
+                <div className="flex justify-between items-center pt-4 border-t border-white/10">
+                    <button className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-black uppercase transition-all">
+                        View Items
+                    </button>
+                    <button className="px-4 py-2 bg-theme text-black font-black uppercase rounded-lg hover:opacity-90 transition-all">
+                        Contact
+                    </button>
+                </div>
+            </motion.div>
+        );
+
+        const BecomeSupplierSection = () => (
+            <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="vault-card p-8 mb-12 text-center relative overflow-hidden"
+            >
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-900/20 to-blue-900/20" />
+                
+                <div className="relative z-10">
+                    <div className="text-6xl mb-6 float-animation">🤝</div>
+                    <h2 className="text-4xl font-black uppercase italic tracking-tighter mb-4">Become a Supplier</h2>
+                    <p className="text-gray-400 text-lg max-w-2xl mx-auto mb-8 font-bold">
+                        Join our elite network of trusted suppliers and start earning premium rates for your digital assets.
+                    </p>
+                    
+                    <div className="centered-panels mb-10">
+                        {[
+                            { icon: '💰', title: 'High Earnings', desc: 'Top-tier commission rates' },
+                            { icon: '⚡', title: 'Fast Payments', desc: 'Daily or weekly payouts' },
+                            { icon: '🛡️', title: 'Full Protection', desc: 'Secure transactions guaranteed' }
+                        ].map((feature, i) => (
+                            <div key={i} className="feature-card p-6 w-full max-w-xs">
+                                <div className="text-3xl mb-4">{feature.icon}</div>
+                                <h4 className="font-black uppercase mb-2 text-lg">{feature.title}</h4>
+                                <p className="text-gray-400 text-sm">{feature.desc}</p>
+                            </div>
+                        ))}
+                    </div>
+                    
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
+                        <button 
+                            onClick={() => window.open(CONFIG.DISCORD_LINK, '_blank')}
+                            className="become-supplier-btn px-10 py-5 rounded-2xl font-black text-lg uppercase tracking-wider flex items-center gap-3"
+                        >
+                            <i className="fab fa-discord"></i>
+                            Join Our Discord to Apply
+                        </button>
+                        
+                        <div className="text-gray-400 text-sm font-bold max-w-xs">
+                            Click above to join our Discord server and apply in the #supplier-application channel
+                        </div>
+                    </div>
+                    
+                    <div className="mt-8 pt-8 border-t border-white/10">
+                        <h4 className="font-black uppercase mb-4 text-theme">Requirements:</h4>
+                        <div className="flex flex-wrap justify-center gap-4">
+                            {[
+                                'Verified Discord Account',
+                                'Minimum 50 items available',
+                                'Positive reputation',
+                                'Active availability'
+                            ].map((req, i) => (
+                                <span key={i} className="px-4 py-2 bg-white/5 rounded-lg text-sm font-bold">
+                                    <i className="fas fa-check text-theme mr-2"></i>
+                                    {req}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </motion.div>
+        );
+
+        const AboutUsPage = () => (
+            <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="space-y-12 pb-20"
+            >
+                <div className="text-center py-12">
+                    <h1 className="text-6xl md:text-8xl font-black uppercase italic tracking-tighter mb-6">
+                        ABOUT <span className="text-theme">CRYPTBLOX</span>
+                    </h1>
+                    <motion.div 
+                        className="breathing-line" 
+                        animate={{ width: ["80px", "350px", "80px"], opacity: [0.2, 1, 0.2] }} 
+                        transition={{ duration: 4, repeat: Infinity }} 
+                    />
+                    <p className="text-gray-400 text-xl max-w-3xl mx-auto mt-8 font-bold">
+                        The most secure and trusted marketplace for digital assets. Built by traders, for traders.
+                    </p>
+                </div>
+
+                <div className="mission-section vault-card p-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+                        <div>
+                            <h2 className="text-4xl font-black uppercase italic tracking-tighter mb-6 text-theme">
+                                Our Mission
+                            </h2>
+                            <p className="text-gray-300 text-lg mb-6 leading-relaxed">
+                                At CRYPTBLOX, we're revolutionizing digital asset trading by creating a secure, transparent, 
+                                and efficient marketplace. Our platform connects collectors, traders, and suppliers in a 
+                                trusted ecosystem built on cutting-edge security and unmatched customer service.
+                            </p>
+                            <div className="grid grid-cols-2 gap-4">
+                                {[
+                                    { number: '2K+', label: 'Successful Transactions' },
+                                    { number: '100%', label: 'Secure Payments' },
+                                    { number: '24/7', label: 'Customer Support' },
+                                    { number: '500+', label: 'Verified Items' }
+                                ].map((stat, i) => (
+                                    <div key={i} className="text-center p-4 border border-white/10 rounded-xl">
+                                        <div className="text-3xl font-black text-theme mb-2">{stat.number}</div>
+                                        <div className="text-sm text-gray-400">{stat.label}</div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        <div className="text-9xl text-center opacity-20 float-animation">
+                            🛡️
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <div className="text-center mb-12">
+                        <h2 className="text-5xl font-black uppercase italic tracking-tighter mb-4">
+                            👥 MEET THE TEAM
+                        </h2>
+                        <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+                            The passionate individuals behind CRYPTBLOX's success
+                        </p>
+                    </div>
+
+                    <div className="centered-panels mb-12">
+                        {TEAM_MEMBERS.map((member) => (
+                            <div key={member.id} className="w-full max-w-md">
+                                <TeamMemberCard member={member} />
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="text-center">
+                        <p className="text-gray-400 mb-6">
+                            Want to join our team? We're always looking for talented individuals!
+                        </p>
+                        <button 
+                            onClick={() => window.open(CONFIG.DISCORD_LINK, '_blank')}
+                            className="px-8 py-3 bg-theme text-black font-black uppercase rounded-xl hover:opacity-90 transition-all"
+                        >
+                            Join Our Discord
+                        </button>
+                    </div>
+                </div>
+
+                <div className="vault-card p-8">
+                    <h2 className="text-4xl font-black uppercase italic tracking-tighter mb-10 text-center text-theme">
+                        Our Journey
+                    </h2>
+                    
+                    <div className="relative">
+                        <div className="absolute left-1/2 transform -translate-x-1/2 h-full w-1 bg-gradient-to-b from-theme via-theme/50 to-transparent" />
+                        
+                        {MILESTONES.map((milestone, index) => (
+                            <motion.div 
+                                key={index}
+                                initial={{ opacity: 0, x: index % 2 === 0 ? -50 : 50 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: index * 0.2 }}
+                                className={`flex items-center mb-12 ${index % 2 === 0 ? 'flex-row' : 'flex-row-reverse'}`}
+                            >
+                                <div className="w-1/2 pr-8 pl-8">
+                                    <div className={`vault-card p-6 ${index % 2 === 0 ? 'text-right' : 'text-left'}`}>
+                                        <div className="text-theme font-black text-2xl mb-2">{milestone.year}</div>
+                                        <h3 className="text-xl font-black uppercase mb-2">{milestone.event}</h3>
+                                        <p className="text-gray-400">{milestone.description}</p>
+                                    </div>
+                                </div>
+                                
+                                <div className="relative z-10">
+                                    <div className="w-6 h-6 rounded-full bg-theme border-4 border-black" />
+                                </div>
+                                
+                                <div className="w-1/2 pl-8 pr-8">
+                                    {/* Empty space for alignment */}
+                                </div>
+                            </motion.div>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="centered-panels">
+                    {[
+                        {
+                            icon: '🔒',
+                            title: 'Security First',
+                            description: 'Every transaction is encrypted and verified. Your safety is our top priority.'
+                        },
+                        {
+                            icon: '⚡',
+                            title: 'Lightning Fast',
+                            description: 'Instant transactions and 24/7 support for all your trading needs.'
+                        },
+                        {
+                            icon: '🤝',
+                            title: 'Trust & Transparency',
+                            description: 'Clear pricing, honest reviews, and verified suppliers only.'
+                        }
+                    ].map((value, i) => (
+                        <div key={i} className="vault-card p-8 text-center w-full max-w-xs">
+                            <div className="text-5xl mb-6 float-animation">{value.icon}</div>
+                            <h3 className="text-2xl font-black uppercase mb-4">{value.title}</h3>
+                            <p className="text-gray-400">{value.description}</p>
+                        </div>
+                    ))}
+                </div>
+
+                <div className="vault-card p-10 text-center relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-r from-theme/10 to-transparent" />
+                    <div className="relative z-10">
+                        <h2 className="text-4xl font-black uppercase italic tracking-tighter mb-6">
+                            Join Our Growing Community
+                        </h2>
+                        <p className="text-gray-400 text-lg max-w-2xl mx-auto mb-8">
+                            Connect with thousands of traders, collectors, and suppliers in our Discord community.
+                        </p>
+                        <button 
+                            onClick={() => window.open(CONFIG.DISCORD_LINK, '_blank')}
+                            className="discord-button px-10 py-4 rounded-xl font-black uppercase tracking-wider text-lg flex items-center gap-3 mx-auto"
+                        >
+                            <i className="fab fa-discord"></i>
+                            Join Discord Community
+                        </button>
+                    </div>
+                </div>
+            </motion.div>
+        );
+
+        const ItemCard = ({ item, onToggleStock, onEdit, onDelete, isAdmin = false, highlightQuery = '', onAddToCart }) => {
+            const highlightText = (text) => {
+                if (!highlightQuery || !text) return text;
+                const regex = new RegExp(`(${highlightQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+                const parts = text.split(regex);
+                return parts.map((part, i) =>
+                    regex.test(part) ? <span key={i} className="search-highlight">{part}</span> : part
+                );
+            };
+
+            return (
+                <motion.div 
+                    whileHover={{ y: -5 }} 
+                    className="vault-card p-6"
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.2 }}
+                >
+                    <div className="flex justify-between items-start mb-4">
+                        <div className="flex-1">
+                            <h3 className="text-xl font-black uppercase italic tracking-tight mb-1">
+                                {highlightQuery ? highlightText(item.name) : item.name}
+                            </h3>
+                            <p className="text-gray-400 text-sm mb-2 line-clamp-2">
+                                {highlightQuery ? highlightText(item.description) : item.description}
+                            </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <StockBadge stock={item.stock} />
+                            {isAdmin && (
+                                <button 
+                                    onClick={() => onToggleStock(item.id)}
+                                    className={`px-3 py-1 rounded-lg text-xs font-black uppercase ${item.enabled ? 'bg-green-500' : 'bg-red-500'}`}
+                                    title={item.enabled ? 'Disable item' : 'Enable item'}
+                                >
+                                    {item.enabled ? 'ON' : 'OFF'}
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                    
+                    <div className="flex justify-between items-center">
+                        <div className="text-3xl font-black text-theme">${item.price}</div>
+                        {isAdmin ? (
+                            <div className="flex gap-2">
+                                <button 
+                                    onClick={() => onEdit(item)}
+                                    className="px-4 py-2 bg-theme/20 hover:bg-theme/30 text-theme rounded-lg text-xs font-black uppercase transition-all"
+                                >
+                                    Edit
+                                </button>
+                                <button 
+                                    onClick={() => onDelete(item.id)}
+                                    className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg text-xs font-black uppercase transition-all"
+                                >
+                                    Delete
+                                </button>
+                            </div>
+                        ) : (
+                            <button 
+                                onClick={() => onAddToCart(item)}
+                                className="px-6 py-2 bg-theme text-black font-black uppercase rounded-lg hover:opacity-90 transition-all"
+                                disabled={item.stock === 0}
+                            >
+                                {item.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
+                            </button>
+                        )}
+                    </div>
+                </motion.div>
+            );
+        };
+
+        const CartPage = ({ cart, onUpdateQuantity, onRemoveItem, onClearCart }) => {
+            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+            // ============================================
+            // HANDLE PURCHASE COMPLETE FUNCTION
+            // ============================================
+            const handlePurchaseComplete = async () => {
+                if (cart.length === 0) {
+                    alert('Your cart is empty!');
+                    return;
+                }
+                
+                // Show loading state
+                const purchaseBtn = document.querySelector('#test-purchase-btn');
+                const originalText = purchaseBtn?.innerHTML;
+                if (purchaseBtn) {
+                    purchaseBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+                    purchaseBtn.disabled = true;
+                }
+                
+                try {
+                    // Send Discord notification
+                    const result = await DiscordService.sendPurchaseNotification(cart, total);
+                    
+                    // Clear cart
+                    onClearCart();
+                    
+                    // Show success message
+                    if (result.success) {
+                        alert(`✅ Purchase successful for $${total.toFixed(2)}!\n\nYour items will be delivered shortly.\nDiscord notification sent to store owners.`);
+                    } else {
+                        alert(`✅ Purchase successful for $${total.toFixed(2)}!\n\nYour items will be delivered shortly.\n(Note: Discord notification failed)`);
+                    }
+                    
+                } catch (error) {
+                    // Still complete purchase but log error
+                    onClearCart();
+                    alert(`✅ Purchase successful for $${total.toFixed(2)}!\n\nYour items will be delivered shortly.`);
+                } finally {
+                    // Reset button
+                    if (purchaseBtn) {
+                        purchaseBtn.innerHTML = originalText;
+                        purchaseBtn.disabled = false;
+                    }
+                }
+            };
+
+            return (
+                <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="space-y-8"
+                >
+                    <div className="text-center mb-8">
+                        <h1 className="text-6xl font-black uppercase italic tracking-tighter mb-4">
+                            <span className="text-theme">YOUR</span> CART
+                        </h1>
+                        <motion.div 
+                            className="breathing-line" 
+                            animate={{ width: ["80px", "350px", "80px"], opacity: [0.2, 1, 0.2] }} 
+                            transition={{ duration: 4, repeat: Infinity }} 
+                        />
+                    </div>
+
+                    {cart.length === 0 ? (
+                        <div className="text-center py-20">
+                            <div className="text-6xl mb-6 opacity-30">
+                                <i className="fas fa-shopping-cart"></i>
+                            </div>
+                            <h2 className="text-3xl font-black uppercase italic tracking-tighter mb-4 text-theme">
+                                YOUR CART IS EMPTY
+                            </h2>
+                            <p className="text-gray-400 mb-8 max-w-md mx-auto">
+                                Browse our categories to find amazing digital assets and add them to your cart.
+                            </p>
+                            <button 
+                                onClick={() => window.location.hash = '#home'}
+                                className="px-8 py-3 bg-theme text-black font-black uppercase rounded-xl hover:opacity-90 transition-all"
+                            >
+                                Start Shopping
+                            </button>
+                        </div>
+                    ) : (
+                        <>
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                                <div className="lg:col-span-2 space-y-6">
+                                    <div className="flex justify-between items-center">
+                                        <h2 className="text-2xl font-black uppercase italic">
+                                            Items ({totalItems})
+                                        </h2>
+                                        <button 
+                                            onClick={onClearCart}
+                                            className="px-4 py-2 border border-red-500 text-red-400 hover:bg-red-500/10 rounded-lg transition-all text-sm font-bold"
+                                        >
+                                            Clear Cart
+                                        </button>
+                                    </div>
+                                    
+                                    <div className="vault-card p-6">
+                                        {cart.map((item, index) => (
+                                            <div key={item.cartId || item.id} className="cart-item">
+                                                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                                    <div className="flex-1">
+                                                        <h3 className="text-lg font-black uppercase italic tracking-tight mb-1">
+                                                            {item.name}
+                                                        </h3>
+                                                        <p className="text-gray-400 text-sm mb-2">{item.description}</p>
+                                                        <div className="flex items-center gap-4">
+                                                            <span className="text-theme font-bold text-xl">
+                                                                ${item.price}
+                                                            </span>
+                                                            <span className="text-gray-400 text-sm">
+                                                                Stock: {item.stock}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div className="flex items-center gap-6">
+                                                        <div className="quantity-control">
+                                                            <button 
+                                                                onClick={() => onUpdateQuantity(item.cartId || item.id, item.quantity - 1)}
+                                                                className="quantity-btn"
+                                                                disabled={item.quantity <= 1}
+                                                            >
+                                                                <i className="fas fa-minus"></i>
+                                                            </button>
+                                                            <input
+                                                                type="number"
+                                                                value={item.quantity}
+                                                                onChange={(e) => onUpdateQuantity(item.cartId || item.id, parseInt(e.target.value) || 1)}
+                                                                min="1"
+                                                                max={item.stock}
+                                                                className="quantity-input"
+                                                            />
+                                                            <button 
+                                                                onClick={() => onUpdateQuantity(item.cartId || item.id, item.quantity + 1)}
+                                                                className="quantity-btn"
+                                                                disabled={item.quantity >= item.stock}
+                                                            >
+                                                                <i className="fas fa-plus"></i>
+                                                            </button>
+                                                        </div>
+                                                        
+                                                        <div className="text-right">
+                                                            <div className="text-xl font-black">
+                                                                ${(item.price * item.quantity).toFixed(2)}
+                                                            </div>
+                                                            <button 
+                                                                onClick={() => onRemoveItem(item.cartId || item.id)}
+                                                                className="text-red-400 hover:text-red-300 text-sm mt-1"
+                                                            >
+                                                                <i className="fas fa-trash mr-1"></i>
+                                                                Remove
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                                
+                                <div className="vault-card p-6 h-fit">
+                                    <h2 className="text-2xl font-black uppercase italic mb-6">Order Summary</h2>
+                                    
+                                    <div className="space-y-4 mb-6">
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-gray-400">Subtotal</span>
+                                            <span className="text-xl font-bold">${total.toFixed(2)}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-gray-400">Items</span>
+                                            <span className="text-lg">{totalItems}</span>
+                                        </div>
+                                        <div className="border-t border-white/10 pt-4">
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-lg font-bold">Total</span>
+                                                <span className="text-3xl font-black text-theme">${total.toFixed(2)}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Stripe Payment Button */}
+                                    {StripeService.generateStripeButton(cart)}
+                                    
+                                    {/* Test Purchase Button */}
+                                    <div className="mt-6 pt-6 border-t border-white/10">
+                                        <h3 className="font-bold uppercase mb-3 text-theme">Test Purchase System</h3>
+                                        <p className="text-sm text-gray-400 mb-4">
+                                            Test the Discord notification system without making a real payment.
+                                        </p>
+                                        <button 
+                                            id="test-purchase-btn"
+                                            onClick={handlePurchaseComplete}
+                                            className="w-full py-3 bg-theme text-black font-black uppercase rounded-lg hover:opacity-90 transition-all"
+                                        >
+                                            <i className="fas fa-bell mr-2"></i>
+                                            Test Complete Purchase & Discord Notification
+                                        </button>
+                                        <p className="text-xs text-gray-500 mt-2">
+                                            This will clear your cart and send a test notification to Discord.
+                                        </p>
+                                    </div>
+                                    
+                                    <div className="mt-6 text-xs text-gray-400 space-y-2">
+                                        <p className="flex items-center gap-2">
+                                            <i className="fas fa-shield-alt text-theme"></i>
+                                            Secure payment with Stripe
+                                        </p>
+                                        <p className="flex items-center gap-2">
+                                            <i className="fas fa-lock text-theme"></i>
+                                            Your payment information is encrypted
+                                        </p>
+                                        <p className="flex items-center gap-2">
+                                            <i className="fas fa-sync text-theme"></i>
+                                            Instant digital delivery
+                                        </p>
+                                    </div>
+                                    
+                                    <div className="mt-8 pt-6 border-t border-white/10">
+                                        <h3 className="font-bold uppercase mb-3 text-theme">Need Help?</h3>
+                                        <p className="text-sm text-gray-400 mb-4">
+                                            Contact our support team on Discord for any questions about your order.
+                                        </p>
+                                        <button 
+                                            onClick={() => window.open(CONFIG.DISCORD_LINK, '_blank')}
+                                            className="w-full py-3 border border-white/10 hover:bg-white/5 rounded-lg transition-all text-sm font-bold"
+                                        >
+                                            <i className="fab fa-discord mr-2"></i>
+                                            Join Support Discord
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div className="vault-card p-6">
+                                <h3 className="text-xl font-black uppercase italic mb-4 text-theme">
+                                    <i className="fas fa-info-circle mr-2"></i>
+                                    Important Information
+                                </h3>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <div className="space-y-2">
+                                        <h4 className="font-bold text-sm uppercase">Delivery</h4>
+                                        <p className="text-sm text-gray-400">
+                                            Digital items are delivered instantly after payment confirmation.
+                                        </p>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <h4 className="font-bold text-sm uppercase">Support</h4>
+                                        <p className="text-sm text-gray-400">
+                                            24/7 support available through our Discord server.
+                                        </p>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <h4 className="font-bold text-sm uppercase">Refunds</h4>
+                                        <p className="text-sm text-gray-400">
+                                            Refunds are handled on a case-by-case basis. Contact support.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </>
+                    )}
+                </motion.div>
+            );
+        };
+
+        const LoginModal = ({ onLogin, onClose }) => {
+            const [username, setUsername] = useState('');
+            const [password, setPassword] = useState('');
+            const [error, setError] = useState('');
+            const [isLoading, setIsLoading] = useState(false);
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                setError('');
+                
+                if (!username.trim() || !password.trim()) {
+                    setError('Please enter both username and password');
+                    return;
+                }
+
+                setIsLoading(true);
+                
+                // Simulate API call
+                setTimeout(() => {
+                    if (username === CONFIG.ADMIN_CREDENTIALS.username && password === CONFIG.ADMIN_CREDENTIALS.password) {
+                        onLogin();
+                        onClose();
+                    } else {
+                        setError('Invalid credentials. Try admin / Cryptic');
+                    }
+                    setIsLoading(false);
+                }, 500);
+            };
+
+            return (
+                <AnimatePresence>
+                    <motion.div 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[3000] flex items-center justify-center p-4"
+                    >
+                        <motion.div 
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={onClose}
+                            className="absolute inset-0 bg-black/90 backdrop-blur-sm"
+                        />
+                        
+                        <motion.div 
+                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                            className="login-modal relative w-full max-w-md rounded-3xl p-6 md:p-8"
+                        >
+                            <div className="flex justify-between items-center mb-8">
+                                <div>
+                                    <h2 className="text-2xl font-black uppercase italic tracking-tight mb-2 text-theme">
+                                        <i className="fas fa-lock mr-2"></i>
+                                        Admin Access
+                                    </h2>
+                                    <p className="text-gray-400 text-sm">Enter credentials to manage items</p>
+                                </div>
+                                <button 
+                                    onClick={onClose}
+                                    className="text-gray-500 hover:text-white text-xl transition-colors"
+                                    aria-label="Close"
+                                >
+                                    <i className="fas fa-times"></i>
+                                </button>
+                            </div>
+
+                            <form onSubmit={handleSubmit} className="space-y-6">
+                                <div>
+                                    <label className="block text-sm font-black uppercase mb-3 text-gray-400">
+                                        <i className="fas fa-user mr-2"></i>
+                                        Username
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={username}
+                                        onChange={(e) => setUsername(e.target.value)}
+                                        className="password-input w-full p-4 rounded-xl outline-none transition-all text-white"
+                                        placeholder="Enter username"
+                                        disabled={isLoading}
+                                        autoComplete="username"
+                                    />
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-black uppercase mb-3 text-gray-400">
+                                        <i className="fas fa-key mr-2"></i>
+                                        Password
+                                    </label>
+                                    <input
+                                        type="password"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        className="password-input w-full p-4 rounded-xl outline-none transition-all text-white"
+                                        placeholder="Enter password"
+                                        disabled={isLoading}
+                                        autoComplete="current-password"
+                                    />
+                                </div>
+                                
+                                {error && (
+                                    <motion.div 
+                                        initial={{ opacity: 0, y: -10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        className="bg-red-500/20 border border-red-500/30 text-red-400 p-3 rounded-xl text-sm font-bold"
+                                    >
+                                        <i className="fas fa-exclamation-triangle mr-2"></i>
+                                        {error}
+                                    </motion.div>
+                                )}
+                                
+                                <div className="text-xs text-gray-500 font-bold italic pt-2 p-3 bg-white/5 rounded-lg">
+                                    <p className="mb-1">Demo Credentials:</p>
+                                    <p>Username: <span className="text-theme">admin</span></p>
+                                    <p>Password: <span className="text-theme">Cryptic</span></p>
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    disabled={isLoading}
+                                    className="w-full py-4 bg-theme text-black font-black uppercase rounded-xl hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {isLoading ? (
+                                        <span className="flex items-center justify-center gap-2">
+                                            <i className="fas fa-spinner loading-spinner"></i>
+                                            Verifying...
+                                        </span>
+                                    ) : (
+                                        <>
+                                            <i className="fas fa-sign-in-alt mr-2"></i>
+                                            Access Admin Panel
+                                        </>
+                                    )}
+                                </button>
+                            </form>
+                        </motion.div>
+                    </motion.div>
+                </AnimatePresence>
+            );
+        };
+
+        const AdminPanel = ({ category, subCategory, items, onAddItem, onUpdateItem, onDeleteItem, onToggleStock, onClose }) => {
+            const [isEditing, setIsEditing] = useState(false);
+            const [currentItem, setCurrentItem] = useState(null);
+            const [formErrors, setFormErrors] = useState({});
+
+            useEffect(() => {
+                resetForm();
+            }, [category, subCategory]);
+
+            const validateForm = () => {
+                const errors = {};
+                if (!currentItem?.name?.trim()) errors.name = 'Name is required';
+                if (!currentItem?.description?.trim()) errors.description = 'Description is required';
+                if (currentItem?.price <= 0) errors.price = 'Price must be greater than 0';
+                if (currentItem?.stock < 0) errors.stock = 'Stock cannot be negative';
+                return errors;
+            };
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                const errors = validateForm();
+                setFormErrors(errors);
+                
+                if (Object.keys(errors).length === 0) {
+                    if (isEditing) {
+                        onUpdateItem(currentItem);
+                    } else {
+                        onAddItem({
+                            ...currentItem,
+                            id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                            createdAt: new Date().toISOString(),
+                            category: category,
+                            subCategory: subCategory.name
+                        });
+                    }
+                    resetForm();
+                }
+            };
+
+            const resetForm = () => {
+                setCurrentItem({
+                    id: Date.now(),
+                    name: '',
+                    price: 0,
+                    stock: 1,
+                    enabled: true,
+                    description: '',
+                    tags: [],
+                    image: ''
+                });
+                setIsEditing(false);
+                setFormErrors({});
+            };
+
+            const handleEdit = (item) => {
+                setCurrentItem({ ...item });
+                setIsEditing(true);
+            };
+
+            const handleDelete = (itemId) => {
+                if (window.confirm('Are you sure you want to delete this item? This action cannot be undone.')) {
+                    onDeleteItem(itemId);
+                }
+            };
+
+            return (
+                <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 20 }}
+                    className="admin-panel rounded-3xl p-6 md:p-8 max-h-[90vh] overflow-y-auto"
+                >
+                    <div className="flex justify-between items-center mb-8">
+                        <div>
+                            <h2 className="text-2xl font-black uppercase italic tracking-tight mb-2">
+                                <i className="fas fa-cog mr-2"></i>
+                                Manage {subCategory?.name || category}
+                            </h2>
+                            <p className="text-gray-400">Add, edit, and manage items with stock control</p>
+                        </div>
+                        <button 
+                            onClick={onClose}
+                            className="px-4 py-2 border border-white/10 hover:bg-white/5 rounded-lg transition-all font-bold"
+                        >
+                            <i className="fas fa-times mr-2"></i>
+                            Close
+                        </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <div className="space-y-6">
+                            <h3 className="text-lg font-black uppercase text-theme">
+                                <i className={isEditing ? 'fas fa-edit mr-2' : 'fas fa-plus mr-2'}></i>
+                                {isEditing ? 'Edit Item' : 'Add New Item'}
+                            </h3>
+                            
+                            <form onSubmit={handleSubmit} className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-black uppercase mb-2">
+                                        Item Name *
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={currentItem?.name || ''}
+                                        onChange={(e) => setCurrentItem({...currentItem, name: e.target.value})}
+                                        className={`w-full bg-black border ${formErrors.name ? 'border-red-500' : 'border-white/10'} p-4 rounded-xl outline-none focus:border-theme transition-all`}
+                                        required
+                                    />
+                                    {formErrors.name && (
+                                        <p className="text-red-400 text-xs mt-1">{formErrors.name}</p>
+                                    )}
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-black uppercase mb-2">
+                                        Description *
+                                    </label>
+                                    <textarea
+                                        value={currentItem?.description || ''}
+                                        onChange={(e) => setCurrentItem({...currentItem, description: e.target.value})}
+                                        className={`w-full bg-black border ${formErrors.description ? 'border-red-500' : 'border-white/10'} p-4 rounded-xl outline-none focus:border-theme transition-all`}
+                                        rows="3"
+                                        required
+                                    />
+                                    {formErrors.description && (
+                                        <p className="text-red-400 text-xs mt-1">{formErrors.description}</p>
+                                    )}
+                                </div>
+                                
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-black uppercase mb-2">
+                                            Price ($) *
+                                        </label>
+                                        <input
+                                            type="number"
+                                            value={currentItem?.price || 0}
+                                            onChange={(e) => setCurrentItem({...currentItem, price: parseFloat(e.target.value) || 0})}
+                                            className={`w-full bg-black border ${formErrors.price ? 'border-red-500' : 'border-white/10'} p-4 rounded-xl outline-none focus:border-theme transition-all`}
+                                            min="0"
+                                            step="0.01"
+                                            required
+                                        />
+                                        {formErrors.price && (
+                                            <p className="text-red-400 text-xs mt-1">{formErrors.price}</p>
+                                        )}
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-black uppercase mb-2">
+                                            Stock *
+                                        </label>
+                                        <input
+                                            type="number"
+                                            value={currentItem?.stock || 1}
+                                            onChange={(e) => setCurrentItem({...currentItem, stock: parseInt(e.target.value) || 0})}
+                                            className={`w-full bg-black border ${formErrors.stock ? 'border-red-500' : 'border-white/10'} p-4 rounded-xl outline-none focus:border-theme transition-all`}
+                                            min="0"
+                                            required
+                                        />
+                                        {formErrors.stock && (
+                                            <p className="text-red-400 text-xs mt-1">{formErrors.stock}</p>
+                                        )}
+                                    </div>
+                                </div>
+                                
+                                <div className="flex items-center gap-4 pt-2">
+                                    <div className="flex items-center gap-2">
+                                        <input
+                                            type="checkbox"
+                                            id="enabled"
+                                            checked={currentItem?.enabled || true}
+                                            onChange={(e) => setCurrentItem({...currentItem, enabled: e.target.checked})}
+                                            className="w-5 h-5 accent-theme"
+                                        />
+                                        <label htmlFor="enabled" className="text-sm font-bold">Enabled in Stock</label>
+                                    </div>
+                                    
+                                    <div className="flex gap-2 ml-auto">
+                                        {isEditing && (
+                                            <button
+                                                type="button"
+                                                onClick={resetForm}
+                                                className="px-6 py-3 border border-white/10 hover:bg-white/5 rounded-xl transition-all"
+                                            >
+                                                Cancel
+                                            </button>
+                                        )}
+                                        <button
+                                            type="submit"
+                                            className="px-6 py-3 bg-theme text-black font-black uppercase rounded-xl hover:opacity-90 transition-all"
+                                        >
+                                            {isEditing ? 'Update Item' : 'Add Item'}
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div>
+                            <div className="flex justify-between items-center mb-6">
+                                <h3 className="text-lg font-black uppercase text-theme">
+                                    <i className="fas fa-boxes mr-2"></i>
+                                    Current Items ({items.length})
+                                </h3>
+                                <div className="text-sm text-gray-400 font-bold">
+                                    <span className="text-green-500">{items.filter(i => i.enabled).length} enabled</span> • 
+                                    <span className="text-red-500"> {items.filter(i => !i.enabled).length} disabled</span>
+                                </div>
+                            </div>
+                            
+                            <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
+                                {items.length === 0 ? (
+                                    <div className="text-center py-10 border border-dashed border-white/10 rounded-2xl">
+                                        <div className="text-4xl mb-4 opacity-30">
+                                            <i className="fas fa-box-open"></i>
+                                        </div>
+                                        <p className="text-gray-400 font-bold">No items in this category</p>
+                                        <p className="text-sm text-gray-500 mt-2">Add your first item using the form</p>
+                                    </div>
+                                ) : (
+                                    items.map(item => (
+                                        <div key={item.id} className="w-full">
+                                            <ItemCard
+                                                item={item}
+                                                onToggleStock={() => onToggleStock(item.id)}
+                                                onEdit={() => handleEdit(item)}
+                                                onDelete={() => handleDelete(item.id)}
+                                                isAdmin={true}
+                                            />
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </motion.div>
+            );
+        };
+
+        const Cryptblox = () => {
+            const [activeTab, setActiveTab] = useState('home');
+            const [subCategory, setSubCategory] = useState(null);
+            const [dropdownOpen, setDropdownOpen] = useState(null);
+            const [amount, setAmount] = useState(1000);
+            const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
+            const [isAdminPanelOpen, setIsAdminPanelOpen] = useState(false);
+            const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+            const [isLoggedIn, setIsLoggedIn] = useState(false);
+            const [searchQuery, setSearchQuery] = useState('');
+            const [searchResults, setSearchResults] = useState([]);
+            const [showSearchResults, setShowSearchResults] = useState(false);
+            const [cart, setCart] = useState(() => {
+                const savedCart = Storage.get(CONFIG.LOCAL_STORAGE_KEYS.CART);
+                return savedCart || [];
+            });
+            
+            const [items, setItems] = useState(() => {
+                const saved = Storage.get(CONFIG.LOCAL_STORAGE_KEYS.ITEMS);
+                return saved || INITIAL_ITEMS_DATA;
+            });
+
+            const [currentTheme, setCurrentTheme] = useState(() => {
+                const saved = Storage.get(CONFIG.LOCAL_STORAGE_KEYS.THEME);
+                return saved || THEME_OPTIONS.find(t => t.id === CONFIG.DEFAULT_THEME) || THEME_OPTIONS[0];
+            });
+
+            // Save state to localStorage
+            useEffect(() => {
+                Storage.set(CONFIG.LOCAL_STORAGE_KEYS.ITEMS, items);
+            }, [items]);
+
+            useEffect(() => {
+                Storage.set(CONFIG.LOCAL_STORAGE_KEYS.CART, cart);
+            }, [cart]);
+
+            useEffect(() => {
+                Storage.set(CONFIG.LOCAL_STORAGE_KEYS.THEME, currentTheme);
+                
+                const root = document.documentElement;
+                root.style.setProperty('--theme-color', currentTheme.color);
+                root.style.setProperty('--theme-glow', currentTheme.glow);
+                root.style.setProperty('--theme-border', currentTheme.color + '33');
+            }, [currentTheme]);
+
+            // Check login status
+            useEffect(() => {
+                const loggedIn = Storage.get(CONFIG.LOCAL_STORAGE_KEYS.ADMIN) === true;
+                if (loggedIn) {
+                    setIsLoggedIn(true);
+                }
+            }, []);
+
+            // Search functionality
+            useEffect(() => {
+                if (!searchQuery.trim()) {
+                    setSearchResults([]);
+                    setShowSearchResults(false);
+                    return;
+                }
+
+                const query = searchQuery.toLowerCase().trim();
+                const results = [];
+
+                // Search items
+                Object.keys(items).forEach(category => {
+                    Object.keys(items[category]).forEach(subCat => {
+                        items[category][subCat].forEach(item => {
+                            if (item.enabled && (
+                                item.name.toLowerCase().includes(query) ||
+                                item.description.toLowerCase().includes(query) ||
+                                item.tags?.some(tag => tag.toLowerCase().includes(query))
+                            )) {
+                                results.push({
+                                    type: 'item',
+                                    id: item.id,
+                                    name: item.name,
+                                    price: item.price,
+                                    stock: item.stock,
+                                    description: item.description,
+                                    category: category,
+                                    subCategory: subCat,
+                                    item: item
+                                });
+                            }
+                        });
+                    });
+                });
+
+                // Search suppliers
+                SUPPLIERS_DATA.forEach(supplier => {
+                    if (supplier.name.toLowerCase().includes(query)) {
+                        results.push({
+                            type: 'supplier',
+                            id: supplier.id,
+                            name: supplier.name,
+                            rating: supplier.rating,
+                            items: supplier.items,
+                            status: supplier.status,
+                            icon: supplier.icon
+                        });
+                    }
+                });
+
+                // Search categories
+                Object.keys(CATEGORIES).forEach(category => {
+                    CATEGORIES[category].forEach(subCat => {
+                        if (subCat.name.toLowerCase().includes(query) || category.toLowerCase().includes(query)) {
+                            const itemCount = items[category]?.[subCat.name]?.filter(i => i.enabled).length || 0;
+                            results.push({
+                                type: 'category',
+                                name: `${subCat.name} (${category})`,
+                                category: category,
+                                subCategory: subCat.name,
+                                count: itemCount,
+                                icon: subCat.icon
+                            });
+                        }
+                    });
+                });
+
+                setSearchResults(results.slice(0, 20)); // Limit results
+                setShowSearchResults(true);
+            }, [searchQuery, items]);
+
+            const getCurrentItems = () => {
+                if (!activeTab || !subCategory || !CATEGORIES[activeTab]) return [];
+                const currentItems = items[activeTab]?.[subCategory.name] || [];
+                
+                // Filter by search query if on category page
+                if (searchQuery && activeTab !== 'home' && activeTab !== 'suppliers' && activeTab !== 'about' && activeTab !== 'checkout') {
+                    const query = searchQuery.toLowerCase();
+                    return currentItems.filter(item => 
+                        item.enabled && (
+                            item.name.toLowerCase().includes(query) ||
+                            item.description.toLowerCase().includes(query)
+                        )
+                    );
+                }
+                
+                return currentItems.filter(item => item.enabled);
+            };
+
+            const handleSearch = (query) => {
+                setSearchQuery(query);
+                if (query.trim()) {
+                    setShowSearchResults(true);
+                }
+            };
+
+            const handleSearchItemSelect = (result) => {
+                if (result.type === 'item') {
+                    setActiveTab(result.category);
+                    setSubCategory({ name: result.subCategory, icon: CATEGORIES[result.category]?.find(c => c.name === result.subCategory)?.icon || '📦' });
+                } else if (result.type === 'category') {
+                    setActiveTab(result.category);
+                    setSubCategory({ name: result.subCategory, icon: result.icon });
+                } else if (result.type === 'supplier') {
+                    setActiveTab('suppliers');
+                }
+                setSearchQuery('');
+                setShowSearchResults(false);
+                setDropdownOpen(null);
+            };
+
+            const handleAddItem = (newItem) => {
+                if (!activeTab || !subCategory) return;
+                
+                setItems(prev => ({
+                    ...prev,
+                    [activeTab]: {
+                        ...prev[activeTab],
+                        [subCategory.name]: [
+                            ...(prev[activeTab]?.[subCategory.name] || []),
+                            newItem
+                        ]
+                    }
+                }));
+            };
+
+            const handleUpdateItem = (updatedItem) => {
+                if (!activeTab || !subCategory) return;
+                
+                setItems(prev => ({
+                    ...prev,
+                    [activeTab]: {
+                        ...prev[activeTab],
+                        [subCategory.name]: prev[activeTab][subCategory.name].map(item =>
+                            item.id === updatedItem.id ? updatedItem : item
+                        )
+                    }
+                }));
+            };
+
+            const handleDeleteItem = (itemId) => {
+                if (!activeTab || !subCategory) return;
+                
+                setItems(prev => ({
+                    ...prev,
+                    [activeTab]: {
+                        ...prev[activeTab],
+                        [subCategory.name]: prev[activeTab][subCategory.name].filter(item => item.id !== itemId)
+                    }
+                }));
+            };
+
+            const handleToggleStock = (itemId) => {
+                if (!activeTab || !subCategory) return;
+                
+                setItems(prev => ({
+                    ...prev,
+                    [activeTab]: {
+                        ...prev[activeTab],
+                        [subCategory.name]: prev[activeTab][subCategory.name].map(item =>
+                            item.id === itemId ? { ...item, enabled: !item.enabled } : item
+                        )
+                    }
+                }));
+            };
+
+            const handleLogin = () => {
+                setIsLoggedIn(true);
+                Storage.set(CONFIG.LOCAL_STORAGE_KEYS.ADMIN, true);
+            };
+
+            const handleLogout = () => {
+                setIsLoggedIn(false);
+                setIsAdminPanelOpen(false);
+                Storage.remove(CONFIG.LOCAL_STORAGE_KEYS.ADMIN);
+            };
+
+            const addToCart = (item) => {
+                // Check if item is already in cart
+                const existingItem = cart.find(cartItem => cartItem.id === item.id);
+                
+                if (existingItem) {
+                    // Update quantity if already in cart
+                    setCart(prev => prev.map(cartItem =>
+                        cartItem.id === item.id
+                            ? { ...cartItem, quantity: Math.min(cartItem.quantity + 1, item.stock) }
+                            : cartItem
+                    ));
+                } else {
+                    // Add new item to cart
+                    setCart(prev => [...prev, { 
+                        ...item, 
+                        cartId: Date.now(), 
+                        quantity: 1 
+                    }]);
+                }
+            };
+
+            const updateCartQuantity = (cartId, newQuantity) => {
+                if (newQuantity < 1) return;
+                
+                setCart(prev => prev.map(item => {
+                    if (item.cartId === cartId || item.id === cartId) {
+                        // Find the original item to check stock
+                        const originalItem = Object.values(items)
+                            .flatMap(cat => Object.values(cat).flat())
+                            .find(i => i.id === item.id);
+                        
+                        // Ensure we don't exceed stock
+                        const maxQuantity = originalItem ? originalItem.stock : item.stock;
+                        return { ...item, quantity: Math.min(newQuantity, maxQuantity) };
+                    }
+                    return item;
+                }));
+            };
+
+            const removeFromCart = (cartId) => {
+                setCart(prev => prev.filter(item => item.cartId !== cartId && item.id !== cartId));
+            };
+
+            const clearCart = () => {
+                if (window.confirm('Are you sure you want to clear your cart?')) {
+                    setCart([]);
+                }
+            };
+
+            const navAction = (tab, sub = null) => {
+                setActiveTab(tab);
+                setSubCategory(sub);
+                setDropdownOpen(null);
+                setIsAdminPanelOpen(false);
+                setSearchQuery('');
+                setShowSearchResults(false);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            };
+
+            const openAdminPanel = () => {
+                if (isLoggedIn) {
+                    setIsAdminPanelOpen(true);
+                } else {
+                    setIsLoginModalOpen(true);
+                }
+            };
+
+            const ContentDisplay = () => {
+                const currentItems = getCurrentItems();
+                const enabledItems = currentItems.filter(item => item.enabled);
+
+                if (activeTab === 'home') {
+                    return (
+                        <motion.div key="home" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-center py-12 md:py-20">
+                            <motion.h1 
+                                initial={{ scale: 0.8 }} 
+                                animate={{ scale: 1 }} 
+                                className="text-6xl md:text-8xl font-black uppercase italic tracking-tighter mb-6"
+                            >
+                                <span className="text-theme">CRYPT</span>BLOX
+                            </motion.h1>
+                            <motion.div 
+                                className="breathing-line" 
+                                animate={{ width: ["80px", "350px", "80px"], opacity: [0.2, 1, 0.2] }} 
+                                transition={{ duration: 4, repeat: Infinity }} 
+                            />
+                            <p className="text-gray-500 tracking-[0.5em] uppercase text-xs mt-4 font-bold">The Ultimate Digital Market</p>
+                            
+                            {searchQuery && (
+                                <div className="max-w-4xl mx-auto mt-12">
+                                    <h3 className="text-2xl font-black uppercase italic mb-6 text-theme">
+                                        Search Results for "{searchQuery}"
+                                    </h3>
+                                    {enabledItems.length > 0 ? (
+                                        <div className="centered-panels">
+                                            {enabledItems.map(item => (
+                                                <div key={item.id} className="w-full max-w-md">
+                                                    <ItemCard
+                                                        item={item}
+                                                        onToggleStock={() => handleToggleStock(item.id)}
+                                                        onEdit={() => {}}
+                                                        onDelete={() => {}}
+                                                        onAddToCart={addToCart}
+                                                        isAdmin={isLoggedIn}
+                                                        highlightQuery={searchQuery}
+                                                    />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="vault-card p-8 md:p-10 rounded-3xl text-center">
+                                            <div className="text-6xl mb-6 opacity-30">
+                                                <i className="fas fa-search"></i>
+                                            </div>
+                                            <h3 className="text-2xl font-black uppercase italic mb-4">No results found</h3>
+                                            <p className="text-gray-400">Try searching for something else or browse our categories</p>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                            
+                            {!searchQuery && (
+                                <div className="centered-panels mt-12 md:mt-20">
+                                    {[
+                                        { icon: '✨', title: 'Rare Assets', desc: 'Secure high-tier limiteds and exclusive digital goods.' },
+                                        { icon: '🛡️', title: 'Verified Safe', desc: 'Encrypted transaction protocols for your safety.' },
+                                        { icon: '💰', title: 'Market Rates', desc: 'The most competitive pricing across the platform.' }
+                                    ].map((panel, i) => (
+                                        <div key={i} className="w-full max-w-sm">
+                                            <motion.div whileHover={{ y: -5 }} className="vault-card panel-glow p-6 md:p-8 rounded-[2rem]">
+                                                <div className="text-3xl mb-4 float-animation">{panel.icon}</div>
+                                                <h3 className="text-theme font-black mb-4 uppercase italic text-xl">{panel.title}</h3>
+                                                <p className="text-gray-400 text-sm leading-relaxed">{panel.desc}</p>
+                                            </motion.div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </motion.div>
+                    );
+                }
+
+                if (activeTab === 'robux') {
+                    return (
+                        <motion.div key="rbx" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="max-w-xl mx-auto vault-card p-8 md:p-10 rounded-[3rem] text-center shadow-2xl">
+                            <h2 className="text-4xl font-black mb-6 italic uppercase">Currency Supply</h2>
+                            <input 
+                                type="number" 
+                                value={amount} 
+                                onChange={(e) => setAmount(e.target.value)} 
+                                className="w-full bg-black border border-white/10 p-6 rounded-2xl text-4xl font-extrabold text-center text-theme outline-none mb-6 focus:border-theme transition-all" 
+                                min="0"
+                                step="100"
+                            />
+                            <div className="bg-white/5 p-4 rounded-xl mb-6 flex justify-between items-center">
+                                <span className="text-gray-400 text-xs font-bold uppercase">Total Price</span>
+                                <span className="text-2xl font-black text-white">${((amount / 1000) * 4.5).toFixed(2)}</span>
+                            </div>
+                            <button className="w-full bg-theme text-black py-6 rounded-2xl font-black text-xl uppercase hover:scale-[1.02] transition-transform">
+                                Secure Assets
+                            </button>
+                        </motion.div>
+                    );
+                }
+
+                if (activeTab === 'checkout') {
+                    return (
+                        <CartPage
+                            cart={cart}
+                            onUpdateQuantity={updateCartQuantity}
+                            onRemoveItem={removeFromCart}
+                            onClearCart={clearCart}
+                        />
+                    );
+                }
+
+                if (activeTab === 'suppliers') {
+                    return (
+                        <motion.div key="suppliers" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                            <BecomeSupplierSection />
+                            
+                            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+                                <div>
+                                    <h1 className="text-4xl md:text-5xl font-black uppercase italic tracking-tighter mb-2">
+                                        🤝 TRUSTED SUPPLIERS
+                                    </h1>
+                                    <p className="text-gray-400 font-bold">
+                                        {SUPPLIERS_DATA.length} verified suppliers • Premium sourcing network
+                                    </p>
+                                </div>
+                                {isLoggedIn && (
+                                    <button className="px-6 py-3 bg-theme text-black font-black uppercase rounded-xl hover:opacity-90 transition-all flex items-center gap-2">
+                                        <i className="fas fa-cog"></i>
+                                        Manage Suppliers
+                                    </button>
+                                )}
+                            </div>
+
+                            <div className="centered-panels mb-12">
+                                {SUPPLIERS_DATA.map(supplier => (
+                                    <div key={supplier.id} className="w-full max-w-sm">
+                                        <SupplierCard supplier={supplier} />
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="vault-card p-6 md:p-8">
+                                <h3 className="text-2xl font-black uppercase italic mb-6 text-theme">Supplier Benefits</h3>
+                                <div className="centered-panels">
+                                    {[
+                                        { icon: '💰', title: 'Premium Rates', desc: 'Highest payout rates in the market' },
+                                        { icon: '⚡', title: 'Fast Payments', desc: 'Guaranteed payments, no chargebacks' },
+                                        { icon: '📈', title: 'Fast Processing', desc: '24/7 support and quick approvals' }
+                                    ].map((benefit, i) => (
+                                        <div key={i} className="p-6 border border-white/10 rounded-2xl w-full max-w-xs">
+                                            <div className="text-3xl mb-4 float-animation">{benefit.icon}</div>
+                                            <h4 className="font-black uppercase mb-2">{benefit.title}</h4>
+                                            <p className="text-gray-400 text-sm">{benefit.desc}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                                
+                                <div className="mt-10 pt-8 border-t border-white/10 text-center">
+                                    <h4 className="text-xl font-black uppercase mb-4">Ready to Join Our Network?</h4>
+                                    <p className="text-gray-400 mb-6 max-w-2xl mx-auto">
+                                        Become a supplier and start earning premium rates for your digital assets today.
+                                    </p>
+                                    <button 
+                                        onClick={() => window.open(CONFIG.DISCORD_LINK, '_blank')}
+                                        className="become-supplier-btn px-10 py-4 rounded-xl font-black uppercase tracking-wider text-lg flex items-center gap-3 mx-auto"
+                                    >
+                                        <i className="fab fa-discord"></i>
+                                        Apply Now on Discord
+                                    </button>
+                                </div>
+                            </div>
+                        </motion.div>
+                    );
+                }
+
+                if (activeTab === 'about') {
+                    return <AboutUsPage />;
+                }
+
+                // For Limiteds, Accounts, Items sections
+                return (
+                    <motion.div key={`${activeTab}-${subCategory?.name}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+                            <div>
+                                <h1 className="text-4xl md:text-5xl font-black uppercase italic tracking-tighter mb-2">
+                                    {subCategory?.icon} {subCategory?.name.toUpperCase()}
+                                    {searchQuery && (
+                                        <span className="text-lg ml-4 text-theme">
+                                            • Search: "{searchQuery}"
+                                        </span>
+                                    )}
+                                </h1>
+                                <p className="text-gray-400 font-bold">
+                                    {enabledItems.length} items available • {currentItems.filter(item => !item.enabled).length} disabled
+                                    {isLoggedIn && (
+                                        <span className="ml-4 text-theme">
+                                            <i className="fas fa-user-shield"></i> Admin Mode Active
+                                        </span>
+                                    )}
+                                </p>
+                            </div>
+                            <div className="flex gap-3">
+                                {isLoggedIn ? (
+                                    <>
+                                        <button
+                                            onClick={openAdminPanel}
+                                            className="px-6 py-3 bg-theme text-black font-black uppercase rounded-xl hover:opacity-90 transition-all flex items-center gap-2"
+                                        >
+                                            <i className="fas fa-cog"></i>
+                                            Manage Items
+                                        </button>
+                                        <button
+                                            onClick={handleLogout}
+                                            className="px-4 py-3 border border-white/10 hover:bg-white/5 rounded-xl transition-all font-bold"
+                                        >
+                                            Logout
+                                        </button>
+                                    </>
+                                ) : (
+                                    <button
+                                        onClick={openAdminPanel}
+                                        className="px-6 py-3 border border-theme text-theme font-black uppercase rounded-xl hover:bg-theme hover:text-black transition-all flex items-center gap-2"
+                                    >
+                                        <i className="fas fa-lock"></i>
+                                        Admin Login
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+
+                        {enabledItems.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center py-20 px-6 text-center vault-card rounded-[3rem] border-dashed border-2">
+                                <div className="text-6xl mb-6 opacity-30">
+                                    <i className="fas fa-box-open"></i>
+                                </div>
+                                <h2 className="text-3xl font-black uppercase italic tracking-tighter mb-4 text-theme">
+                                    NO {subCategory?.name.toUpperCase()} AVAILABLE
+                                </h2>
+                                <p className="text-gray-400 max-w-md leading-relaxed mb-8 font-bold italic">
+                                    {activeTab && subCategory 
+                                        ? "No items currently available in this category."
+                                        : "This sector of the vault is currently restricted or empty."}
+                                </p>
+                                <div className="flex gap-4">
+                                    <button onClick={() => navAction('home')} className="px-6 py-3 border border-white/10 hover:bg-white/5 rounded-xl transition-all font-bold">
+                                        Return Home
+                                    </button>
+                                    {activeTab && subCategory && (
+                                        <button onClick={openAdminPanel} className="px-6 py-3 bg-theme text-black font-black uppercase rounded-xl hover:opacity-90 transition-all">
+                                            {isLoggedIn ? 'Add Items' : 'Admin Login'}
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="centered-panels">
+                                {enabledItems.map(item => (
+                                    <div key={item.id} className="w-full max-w-md">
+                                        <ItemCard
+                                            item={item}
+                                            onToggleStock={() => handleToggleStock(item.id)}
+                                            onEdit={() => {}}
+                                            onDelete={() => {}}
+                                            onAddToCart={addToCart}
+                                            isAdmin={isLoggedIn}
+                                            highlightQuery={searchQuery}
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </motion.div>
+                );
+            };
+
+            return (
+                <div className="min-h-screen relative">
+                    <ParticleFall themeColor={currentTheme.color} />
+
+                    <nav className="glass-nav px-4 md:px-8 py-4">
+                        <div className="max-w-7xl mx-auto flex flex-wrap items-center gap-4">
+                            <div className="flex items-center gap-2 order-1">
+                                <button 
+                                    onClick={() => setIsThemeModalOpen(true)} 
+                                    className="flex items-center gap-2 px-4 py-2 bg-white/5 rounded-lg border border-white/10 text-[10px] font-black uppercase hover:bg-white/10 transition-all"
+                                >
+                                    <div className="w-2 h-2 rounded-full bg-theme" style={{ boxShadow: `0 0 8px ${currentTheme.color}` }} />
+                                    Theme
+                                </button>
+                                {isLoggedIn && (
+                                    <button 
+                                        onClick={handleLogout}
+                                        className="px-3 py-2 bg-red-500/20 text-red-400 rounded-lg text-[10px] font-black uppercase hover:bg-red-500/30 transition-all"
+                                    >
+                                        Logout
+                                    </button>
+                                )}
+                            </div>
+
+                            <div className="flex items-center gap-2 order-2 md:order-3 ml-auto md:ml-0">
+                                <div 
+                                    onClick={() => navAction('home')} 
+                                    className="text-2xl font-black italic tracking-tighter text-theme uppercase cursor-pointer logo-container hover:opacity-90 transition-opacity"
+                                >
+                                    CRYPT<span className="text-white">BLOX</span>
+                                    <span className="logo-triangle"></span>
+                                </div>
+                                <button 
+                                    onClick={() => navAction('about')}
+                                    className="ml-4 px-3 py-1 text-sm font-extrabold uppercase tracking-tight text-gray-400 hover:text-white transition-all hidden md:block"
+                                >
+                                    About Us
+                                </button>
+                            </div>
+
+                            <div className="relative w-full md:w-auto md:flex-1 mx-0 md:mx-6 order-4 md:order-2 search-bar-container">
+                                <SearchBar 
+                                    onSearch={handleSearch}
+                                    searchQuery={searchQuery}
+                                    onClear={() => setSearchQuery('')}
+                                    onItemSelect={handleSearchItemSelect}
+                                />
+                                
+                                <AnimatePresence>
+                                    {showSearchResults && searchQuery && (
+                                        <SearchResults 
+                                            results={searchResults}
+                                            query={searchQuery}
+                                            onItemSelect={handleSearchItemSelect}
+                                            onClose={() => setShowSearchResults(false)}
+                                        />
+                                    )}
+                                </AnimatePresence>
+                            </div>
+
+                            <div className="flex items-center gap-2 md:gap-4 order-3 md:order-4 nav-buttons w-full md:w-auto">
+                                {Object.keys(CATEGORIES).map(category => (
+                                    <div key={category} className="relative" onMouseEnter={() => setDropdownOpen(category)} onMouseLeave={() => setDropdownOpen(null)}>
+                                        <button className={`px-2 py-2 text-sm font-extrabold uppercase transition-all tracking-tight ${activeTab === category ? 'text-theme' : 'text-gray-400 hover:text-white'}`}>
+                                            {category} <i className="fas fa-chevron-down text-xs ml-1"></i>
+                                        </button>
+                                        <AnimatePresence>
+                                            {dropdownOpen === category && (
+                                                <motion.div 
+                                                    initial={{ opacity: 0, y: 10 }} 
+                                                    animate={{ opacity: 1, y: 0 }} 
+                                                    exit={{ opacity: 0 }} 
+                                                    className="absolute top-full left-0 w-56 bg-[#0f0f0f] border border-white/10 p-2 rounded-xl mt-2 shadow-2xl z-[1000]"
+                                                >
+                                                    {CATEGORIES[category].map(cat => (
+                                                        <div 
+                                                            key={cat.name} 
+                                                            onClick={() => navAction(category, cat)} 
+                                                            className="p-3 hover:bg-white/5 rounded-lg text-xs font-black cursor-pointer flex items-center gap-3 uppercase transition-all"
+                                                        >
+                                                            <span>{cat.icon}</span> {cat.name}
+                                                        </div>
+                                                    ))}
+                                                </motion.div>
+                                            )}
+                                        </AnimatePresence>
+                                    </div>
+                                ))}
+
+                                <button 
+                                    onClick={() => navAction('suppliers')} 
+                                    className={`px-2 py-2 text-sm font-extrabold uppercase tracking-tight ${activeTab === 'suppliers' ? 'text-theme' : 'text-gray-400 hover:text-white'}`}
+                                >
+                                    Suppliers
+                                </button>
+                                <button 
+                                    onClick={() => navAction('robux')} 
+                                    className={`px-2 py-2 text-sm font-extrabold uppercase tracking-tight ${activeTab === 'robux' ? 'text-theme' : 'text-gray-400 hover:text-white'}`}
+                                >
+                                    Robux
+                                </button>
+                                <div className="relative">
+                                    <button 
+                                        onClick={() => navAction('checkout')} 
+                                        className={`px-4 py-2 text-sm font-black uppercase border-2 border-white/10 rounded-xl transition-all ${activeTab === 'checkout' ? 'bg-theme text-black' : 'text-theme hover:bg-theme hover:text-black'}`}
+                                    >
+                                        <i className="fas fa-shopping-cart mr-2"></i>
+                                        Cart
+                                    </button>
+                                    {cart.length > 0 && (
+                                        <span className="cart-badge">
+                                            {cart.reduce((sum, item) => sum + item.quantity, 0)}
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </nav>
+
+                    <main className="max-w-6xl mx-auto p-4 md:p-6 py-12 relative z-10 mt-16">
+                        <AnimatePresence mode="wait">
+                            <ContentDisplay />
+                        </AnimatePresence>
+                    </main>
+
+                    <div className="fixed bottom-0 w-full bg-black border-t border-white/10 py-2 overflow-hidden z-50">
+                        <motion.div 
+                            initial={{ x: "100%" }} 
+                            animate={{ x: "-100%" }} 
+                            transition={{ repeat: Infinity, duration: 25, ease: "linear" }} 
+                            className="flex gap-20 items-center whitespace-nowrap"
+                        >
+                            <span className="text-[10px] font-black text-theme uppercase tracking-widest italic">
+                                CRYPTBLOX SECURITY: VERIFIED
+                            </span>
+                            <span className="text-[10px] font-black text-white uppercase tracking-widest font-bold">
+                                ESTABLISHED 2022 - THE DIGITAL STANDARD
+                            </span>
+                            <span className="text-[10px] font-black text-theme uppercase tracking-widest italic">
+                                CRYPTBLOX SECURITY: VERIFIED
+                            </span>
+                        </motion.div>
+                    </div>
+
+                    <motion.a 
+                        href={CONFIG.DISCORD_LINK} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        whileHover={{ scale: 1.1 }} 
+                        className="fixed bottom-12 right-4 md:right-8 z-[100] discord-button w-14 h-14 rounded-full flex items-center justify-center text-2xl shadow-2xl"
+                        aria-label="Join Discord"
+                    >
+                        <i className="fab fa-discord"></i>
+                    </motion.a>
+
+                    <AnimatePresence>
+                        {isThemeModalOpen && (
+                            <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4">
+                                <motion.div 
+                                    initial={{ opacity: 0 }} 
+                                    animate={{ opacity: 1 }} 
+                                    exit={{ opacity: 0 }} 
+                                    onClick={() => setIsThemeModalOpen(false)} 
+                                    className="absolute inset-0 bg-black/90 backdrop-blur-sm" 
+                                />
+                                <motion.div 
+                                    initial={{ scale: 0.9, opacity: 0 }} 
+                                    animate={{ scale: 1, opacity: 1 }} 
+                                    exit={{ scale: 0.9, opacity: 0 }} 
+                                    className="relative w-full max-w-2xl bg-[#050505] border border-white/10 rounded-2xl p-6 md:p-8"
+                                >
+                                    <div className="flex justify-between items-center mb-8">
+                                        <h2 className="text-2xl font-extrabold tracking-tight uppercase italic">
+                                            <i className="fas fa-palette mr-2"></i>
+                                            Visual Overrides
+                                        </h2>
+                                        <button 
+                                            onClick={() => setIsThemeModalOpen(false)} 
+                                            className="text-gray-500 hover:text-white transition-colors"
+                                            aria-label="Close theme picker"
+                                        >
+                                            <i className="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                        {THEME_OPTIONS.map((t) => (
+                                            <div 
+                                                key={t.id} 
+                                                onClick={() => { setCurrentTheme(t); setIsThemeModalOpen(false); }} 
+                                                className={`theme-card p-5 rounded-xl flex flex-col justify-between h-28 cursor-pointer ${currentTheme.id === t.id ? 'active' : ''}`}
+                                                role="button"
+                                                tabIndex={0}
+                                                onKeyPress={(e) => e.key === 'Enter' && (setCurrentTheme(t), setIsThemeModalOpen(false))}
+                                            >
+                                                <div className="flex justify-between items-start">
+                                                    <span className="font-bold text-lg">{t.name}</span>
+                                                    <div 
+                                                        className="w-3 h-3 rounded-full" 
+                                                        style={{ backgroundColor: t.color, boxShadow: `0 0 10px ${t.color}` }} 
+                                                    />
+                                                </div>
+                                                <span className="text-xs text-gray-500 font-semibold">{t.label}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </motion.div>
+                            </div>
+                        )}
+
+                        {isLoginModalOpen && (
+                            <LoginModal
+                                onLogin={handleLogin}
+                                onClose={() => setIsLoginModalOpen(false)}
+                            />
+                        )}
+
+                        {isAdminPanelOpen && activeTab && subCategory && isLoggedIn && (
+                            <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4">
+                                <motion.div 
+                                    initial={{ opacity: 0 }} 
+                                    animate={{ opacity: 1 }} 
+                                    exit={{ opacity: 0 }} 
+                                    onClick={() => setIsAdminPanelOpen(false)} 
+                                    className="absolute inset-0 bg-black/90 backdrop-blur-sm" 
+                                />
+                                <div className="w-full max-w-6xl">
+                                    <AdminPanel
+                                        category={activeTab}
+                                        subCategory={subCategory}
+                                        items={getCurrentItems()}
+                                        onAddItem={handleAddItem}
+                                        onUpdateItem={handleUpdateItem}
+                                        onDeleteItem={handleDeleteItem}
+                                        onToggleStock={handleToggleStock}
+                                        onClose={() => setIsAdminPanelOpen(false)}
+                                    />
+                                </div>
+                            </div>
+                        )}
+                    </AnimatePresence>
+                </div>
+            );
+        };
+
+        // Render the app
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<Cryptblox />);
+
+        // Expose DiscordService for testing
+        window.DiscordService = DiscordService;
+        console.log('🎮 Test Discord notification: DiscordService.testNotification()');
+    </script>
+</body>
+</html>
